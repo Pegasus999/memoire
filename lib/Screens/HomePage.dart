@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:admins/Screens/EmployeeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:admins/Screens/KidsScreen.dart';
@@ -16,16 +18,21 @@ class HomePage extends StatefulWidget {
 class _KidsListScreenState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool search = false;
+  bool _showPopup = false;
   String selected = "List";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        floatingActionButton: selected == "Notification"
+        floatingActionButton: selected == "Notification" && !_showPopup
             ? FloatingActionButton(
                 backgroundColor: Constant.Blue,
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    _showPopup = true;
+                  });
+                },
                 child: FaIcon(FontAwesomeIcons.plus),
               )
             : null,
@@ -99,17 +106,22 @@ class _KidsListScreenState extends State<HomePage> {
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.8,
-              child: ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemBuilder: (BuildContext context, int index) {
-                  return selected == "List"
-                      ? KidsScreen(index: index)
-                      : selected == "Notification"
-                          ? NotificationScreen(index: index)
-                          : EmployeeScreen(index: index);
-                },
-                itemCount: 3,
-              ),
+              child: _showPopup
+                  ? _buildPopUp()
+                  : ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemBuilder: (BuildContext context, int index) {
+                        return selected == "List"
+                            ? KidsScreen(index: index)
+                            : selected == "Notification"
+                                ? NotificationScreen(
+                                    index: index,
+                                    popUp: _showPopup,
+                                  )
+                                : EmployeeScreen(index: index);
+                      },
+                      itemCount: 3,
+                    ),
             )
           ]),
         ));
@@ -137,7 +149,7 @@ class _KidsListScreenState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "أسم الولي",
+                      "أسم الموظف",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -157,31 +169,6 @@ class _KidsListScreenState extends State<HomePage> {
                 flex: 4,
                 child: Row(
                   children: [
-                    Expanded(
-                        flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "ايام الاشتراك المتبقية",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  height: 1,
-                                  fontWeight: FontWeight.w700),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 9),
-                            Text(
-                              '5',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700),
-                            )
-                          ],
-                        )),
                     Expanded(
                         flex: 1,
                         child: Column(
@@ -310,5 +297,92 @@ class _KidsListScreenState extends State<HomePage> {
                   label: Text(label),
                   labelStyle: TextStyle(color: Colors.black)),
             ))));
+  }
+
+  _buildPopUp() {
+    return AnimatedOpacity(
+        duration: Duration(milliseconds: 500),
+        opacity: _showPopup ? 1.0 : 0.0,
+        child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Center(
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+                width: MediaQuery.of(context).size.width * 0.9,
+                decoration: BoxDecoration(
+                    color: Constant.Blue,
+                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                child: Column(children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0, right: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _showPopup = false;
+                              });
+                            },
+                            child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _showPopup = false;
+                                  });
+                                },
+                                child: FaIcon(FontAwesomeIcons.xmark)))
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Form(
+                      child: Column(
+                    children: [
+                      Container(
+                          width: 300,
+                          child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: TextField(
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                    label: Text('عنوان الاشعار'),
+                                    labelStyle: TextStyle(color: Colors.white)),
+                              ))),
+                      SizedBox(height: 20),
+                      Container(
+                          width: 300,
+                          height: 140,
+                          child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: TextField(
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                    label: Text('تفاصيل الاشعار'),
+                                    labelStyle: TextStyle(color: Colors.white)),
+                              ))),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Constant.Background,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8))),
+                              width: 60,
+                              height: 40,
+                              child: Center(child: Text("تاكيد")),
+                            )
+                          ],
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                        ),
+                      )
+                    ],
+                  ))
+                ]),
+              ),
+            )));
   }
 }

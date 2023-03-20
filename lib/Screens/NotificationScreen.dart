@@ -1,10 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({Key? key, required this.index}) : super(key: key);
+  NotificationScreen({Key? key, required this.index, required this.popUp})
+      : super(key: key);
   final int index;
+  bool popUp;
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
@@ -12,6 +16,12 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      children: [_buildUi()],
+    );
+  }
+
+  _buildUi() {
     return Center(
       child: Container(
         margin: EdgeInsets.only(top: 8),
