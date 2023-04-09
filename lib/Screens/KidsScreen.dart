@@ -1,14 +1,13 @@
+import 'package:admins/Models/Kid.dart';
 import 'package:admins/Screens/KidDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../constant.dart';
 
 class KidsScreen extends StatefulWidget {
-  const KidsScreen({Key? key, required this.index}) : super(key: key);
-  final int index;
+  const KidsScreen({Key? key, required this.kid}) : super(key: key);
+  final Kid kid;
   @override
   State<KidsScreen> createState() => _KidsScreenState();
 }

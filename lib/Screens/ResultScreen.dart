@@ -1,16 +1,15 @@
 import 'package:admins/Screens/LoginScreen.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class ResultScreen extends StatefulWidget {
+  const ResultScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<ResultScreen> createState() => _ResultScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _ResultScreenState extends State<ResultScreen> {
   @override
   void initState() {
     super.initState();
@@ -27,9 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: SvgPicture.asset(
-      'assets/images/logo.svg',
-      semanticsLabel: 'logo',
-    ));
+      child: Text("Account added succefully"),
+    );
   }
 }

@@ -1,16 +1,20 @@
+import 'dart:convert';
 import 'dart:ui';
-
+import 'package:admins/Models/Kid.dart';
+import 'package:admins/Models/Notification.dart';
+import 'package:admins/Models/User.dart';
 import 'package:admins/Screens/EmployeeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:admins/Screens/KidsScreen.dart';
 import 'package:admins/Screens/LoginScreen.dart';
 import 'package:admins/Screens/NotificationScreen.dart';
 import 'package:admins/constant.dart';
+import 'package:http/http.dart' as http;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
+  const HomePage({Key? key, required this.user}) : super(key: key);
+  final User user;
   @override
   State<HomePage> createState() => _KidsListScreenState();
 }
@@ -20,6 +24,59 @@ class _KidsListScreenState extends State<HomePage> {
   bool search = false;
   bool _showPopup = false;
   String selected = "List";
+  List<Kid>? kids;
+  List<Notifications>? notifications;
+  List<User>? users;
+
+  Future<List<Kid>> getKids() async {
+    var baseUrl = "http://10.0.2.2:5000/api/";
+    var type = "kids/getAll";
+    var url = Uri.parse('${baseUrl}${type}');
+    var response = await http.get(url);
+    var data = jsonDecode(response.body);
+
+    if (data.runtimeType == String) {
+      throw Exception();
+    }
+
+    setState(() {
+      kids = Kid.parseKids(data);
+    });
+    return Kid.parseKids(data);
+  }
+
+  Future<List<Notifications>> getNotifications() async {
+    var baseUrl = "http://10.0.2.2:5000/api/";
+    var type = "notif/getAll";
+    var url = Uri.parse('${baseUrl}${type}');
+    var response = await http.get(url);
+    var data = jsonDecode(response.body);
+
+    if (data.runtimeType == String) {
+      throw Exception();
+    }
+    setState(() {
+      notifications = Notifications.parseNotif(data);
+    });
+    return Notifications.parseNotif(data);
+  }
+
+  Future<List<User>> getUsers() async {
+    var baseUrl = "http://10.0.2.2:5000/api/";
+    var type = "user/getAll";
+    var url = Uri.parse('${baseUrl}${type}');
+    var response = await http.get(url);
+    var data = jsonDecode(response.body);
+
+    if (data.runtimeType == String) {
+      throw Exception();
+    }
+    setState(() {
+      users = User.parseUser(data);
+    });
+    return User.parseUser(data);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,19 +165,44 @@ class _KidsListScreenState extends State<HomePage> {
               height: MediaQuery.of(context).size.height * 0.8,
               child: _showPopup
                   ? _buildPopUp()
-                  : ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      itemBuilder: (BuildContext context, int index) {
-                        return selected == "List"
-                            ? KidsScreen(index: index)
-                            : selected == "Notification"
-                                ? NotificationScreen(
-                                    index: index,
-                                    popUp: _showPopup,
-                                  )
-                                : EmployeeScreen(index: index);
+                  : FutureBuilder(
+                      future: selected == "List"
+                          ? getKids()
+                          : selected == "notifications"
+                              ? getNotifications()
+                              : getUsers(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if (snapshot.hasData) {
+                          return ListView.builder(
+                            physics: BouncingScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              return selected == "List"
+                                  ? KidsScreen(kid: kids![index])
+                                  : selected == "Notification"
+                                      ? NotificationScreen(
+                                          notification: notifications![index],
+                                          popUp: _showPopup,
+                                        )
+                                      : EmployeeScreen(index: index);
+                            },
+                            itemCount: kids!.length,
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              selected == "List"
+                                  ? "No kids Found"
+                                  : selected == "Notification"
+                                      ? "No Notifications Found"
+                                      : "No Users Found",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          );
+                        } else {
+                          return Center(child: CircularProgressIndicator());
+                        }
                       },
-                      itemCount: 3,
                     ),
             )
           ]),
@@ -149,7 +231,7 @@ class _KidsListScreenState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      "أسم الموظف",
+                      "${widget.user.name} ${widget.user.lastname}",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,

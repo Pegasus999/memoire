@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'package:admins/Models/User.dart';
+import 'package:admins/Screens/DriverScreen.dart';
 import 'package:admins/Screens/HomePage.dart';
-import 'package:flutter/gestures.dart';
+import 'package:admins/Screens/RegisterScreen.dart';
+import 'package:admins/Services/Api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:admins/constant.dart';
@@ -14,6 +18,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _showPopup = false;
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -71,43 +78,48 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: EdgeInsets.all(8),
                       height: 300,
                       child: Form(
+                          key: _formKey,
                           child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildInputField('اسم المستخدم', false),
-                          SizedBox(height: 40),
-                          _buildInputField('كلمة السر', true),
-                          SizedBox(height: 60),
-                          TextButton(
-                            onPressed: () => {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) => HomePage())))
-                            },
-                            child: Text(
-                              "دخول",
-                              style: TextStyle(
-                                  color: Constant.Blue,
-                                  fontSize: 20,
-                                  fontFamily: "Inter",
-                                  fontWeight: FontWeight.w700),
-                            ),
-                            style: ButtonStyle(
-                              minimumSize:
-                                  MaterialStatePropertyAll(Size(90, 40)),
-                              backgroundColor: MaterialStateProperty.all(
-                                  Constant.Background),
-                              shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildInputField(
+                                'اسم المستخدم',
+                                false,
+                                usernameController,
                               ),
-                            ),
-                          )
-                        ],
-                      ))),
+                              SizedBox(height: 40),
+                              _buildInputField(
+                                  'كلمة السر', true, passwordController),
+                              SizedBox(height: 60),
+                              TextButton(
+                                onPressed: () async => {
+                                  // await API.login(usernameController.text,
+                                  //     passwordController.text, context)
+                                  _handleSubmit()
+                                },
+                                child: Text(
+                                  "دخول",
+                                  style: TextStyle(
+                                      color: Constant.Blue,
+                                      fontSize: 20,
+                                      fontFamily: "Inter",
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                style: ButtonStyle(
+                                  minimumSize:
+                                      MaterialStatePropertyAll(Size(90, 40)),
+                                  backgroundColor: MaterialStateProperty.all(
+                                      Constant.Background),
+                                  shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ))),
                   SizedBox(height: 40),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,13 +149,20 @@ class _LoginScreenState extends State<LoginScreen> {
         ]);
   }
 
-  _buildInputField(String label, bool pass) {
+  _buildInputField(String label, bool pass, TextEditingController controller) {
     return (Container(
         width: 300,
         height: 50,
         child: Directionality(
             textDirection: TextDirection.rtl,
-            child: TextField(
+            child: TextFormField(
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
+              controller: controller,
               style: TextStyle(color: Colors.white),
               obscureText: pass,
               decoration: InputDecoration(
@@ -216,5 +235,36 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleSubmit() async {
+    Navigator.push(
+        context, MaterialPageRoute(builder: ((context) => RegisterScreen())));
+    // try {
+    //   final headers = {'Content-Type': 'application/json'};
+    //   final url = Uri.parse('http://10.0.2.2:5000/api/auth/signin');
+    //   final body = jsonEncode({
+    //     'username': usernameController.text,
+    //     'password': passwordController.text
+    //   });
+
+    //   final response = await http.post(url, headers: headers, body: body);
+
+    //   if (response.statusCode == 200) {
+    //     var user = User.fromJson(jsonDecode(response.body));
+    //     // Navigator.push(
+    //     //     context,
+    //     //     MaterialPageRoute(
+    //     //         builder: ((context) => HomePage(
+    //     //               user: user,
+    //     //             ))));
+    //    ;
+    //   } else {
+    //     print('Request failed with status: ${response.statusCode}.');
+    //   }
+    // } catch (error) {
+    //   //   // Handle any exceptions that occurred during the request
+    //   print('Request failed with error: $error');
+    // }
   }
 }

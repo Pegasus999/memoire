@@ -1,13 +1,16 @@
 import 'dart:ui';
 
+import 'package:admins/Models/Notification.dart';
 import 'package:flutter/material.dart';
 
 import '../constant.dart';
 
 class NotificationScreen extends StatefulWidget {
-  NotificationScreen({Key? key, required this.index, required this.popUp})
+  NotificationScreen(
+      {Key? key, required this.notification, required this.popUp})
       : super(key: key);
-  final int index;
+  final Notifications notification;
+
   bool popUp;
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
