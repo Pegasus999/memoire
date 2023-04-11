@@ -17,8 +17,10 @@ class _KidsScreenState extends State<KidsScreen> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => KidDetailScreen()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => KidDetailScreen(kid: widget.kid)));
       },
       child: Center(
         child: Container(
@@ -41,7 +43,7 @@ class _KidsScreenState extends State<KidsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          "أسم الطفل",
+                          "${widget.kid.lastname} ${widget.kid.name}",
                           style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
                         SizedBox(height: 10),
@@ -69,14 +71,14 @@ class _KidsScreenState extends State<KidsScreen> {
                                       size: 15,
                                     ),
                                     SizedBox(width: 5),
-                                    Text("0556996758")
+                                    Text("${widget.kid.phone}")
                                   ],
                                 ),
                               ),
                             ),
                             SizedBox(width: 20),
                             Text(
-                              "سيدي عمار",
+                              "${widget.kid.zone}",
                               style: TextStyle(fontSize: 15),
                             ),
                             Icon(Icons.location_pin)

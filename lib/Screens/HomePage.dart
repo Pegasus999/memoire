@@ -4,6 +4,7 @@ import 'package:admins/Models/Kid.dart';
 import 'package:admins/Models/Notification.dart';
 import 'package:admins/Models/User.dart';
 import 'package:admins/Screens/EmployeeScreen.dart';
+import 'package:admins/Screens/RegisterScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:admins/Screens/KidsScreen.dart';
 import 'package:admins/Screens/LoginScreen.dart';
@@ -34,11 +35,9 @@ class _KidsListScreenState extends State<HomePage> {
     var url = Uri.parse('${baseUrl}${type}');
     var response = await http.get(url);
     var data = jsonDecode(response.body);
-
     if (data.runtimeType == String) {
       throw Exception();
     }
-
     setState(() {
       kids = Kid.parseKids(data);
     });
@@ -67,7 +66,6 @@ class _KidsListScreenState extends State<HomePage> {
     var url = Uri.parse('${baseUrl}${type}');
     var response = await http.get(url);
     var data = jsonDecode(response.body);
-
     if (data.runtimeType == String) {
       throw Exception();
     }
@@ -185,9 +183,16 @@ class _KidsListScreenState extends State<HomePage> {
                                         )
                                       : EmployeeScreen(index: index);
                             },
-                            itemCount: kids!.length,
+                            itemCount: selected == "List"
+                                ? kids!.length
+                                : selected == "notifications"
+                                    ? notifications!.length
+                                    : users!.length,
                           );
-                        } else if (snapshot.hasError) {
+                        } else if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else {
                           return Center(
                             child: Text(
                               selected == "List"
@@ -199,8 +204,6 @@ class _KidsListScreenState extends State<HomePage> {
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           );
-                        } else {
-                          return Center(child: CircularProgressIndicator());
                         }
                       },
                     ),
@@ -247,13 +250,12 @@ class _KidsListScreenState extends State<HomePage> {
                 ),
               ),
             ),
-            Expanded(
-                flex: 4,
-                child: Row(
-                  children: [
-                    Expanded(
-                        flex: 1,
-                        child: Column(
+            widget.user.auth == "EMPLOYEE"
+                ? Expanded(
+                    flex: 4,
+                    child: Row(
+                      children: [
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -272,9 +274,46 @@ class _KidsListScreenState extends State<HomePage> {
                                   fontWeight: FontWeight.w700),
                             )
                           ],
-                        ))
-                  ],
-                ))
+                        ),
+                      ],
+                    ),
+                  )
+                : Expanded(
+                    flex: 4,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: ((context) => RegisterScreen(
+                                          user: widget.user,
+                                        ))));
+                          },
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.user,
+                                  color: Colors.white,
+                                  size: 15,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "اضافة مستخدم",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700),
+                                ),
+                              ]),
+                        )
+                      ],
+                    ))
           ]),
         ),
         Container(

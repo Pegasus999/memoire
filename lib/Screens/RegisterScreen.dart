@@ -8,8 +8,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
-
+  const RegisterScreen({super.key, required this.user});
+  final user;
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -48,13 +48,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               : page == 1
                   ? _secondPage()
                   : page == 2 && authority != "PARENT"
-                      ? ResultScreen()
+                      ? ResultScreen(
+                          user: widget.user,
+                        )
                       : _kidsRegister(),
         ));
   }
 
   _kidsRegister() {
-    return ResultScreen();
+    return ResultScreen(
+      user: widget.user,
+    );
   }
 
   Column _listOfKids() {
