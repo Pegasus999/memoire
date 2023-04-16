@@ -6,8 +6,8 @@ class Constant {
 }
 
 class Auth {
-  String? label;
-  String? value;
+  String label;
+  String value;
 
   Auth(String this.label, String this.value);
 }

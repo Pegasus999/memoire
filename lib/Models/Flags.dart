@@ -1,11 +1,12 @@
 import 'package:admins/Models/Kid.dart';
 
 class Flag {
-  String id = '';
   String title = '';
   String details = '';
   Flag.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        title = json['title'],
-        details = json['Details'];
+      : title = json['title'],
+        details = json['details'];
+  static List<Flag> parseFlags(List<dynamic> flags) {
+    return flags.map((json) => Flag.fromJson(json)).toList();
+  }
 }

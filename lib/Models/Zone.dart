@@ -1,7 +1,7 @@
 import 'package:admins/Models/Kid.dart';
 
 class Zone {
-  int id = 0;
+  int? id;
   String name = '';
   String? kidId;
   String? userId;

@@ -78,7 +78,7 @@ class _KidsScreenState extends State<KidsScreen> {
                             ),
                             SizedBox(width: 20),
                             Text(
-                              "${widget.kid.zone}",
+                              "${widget.kid.zone.name}",
                               style: TextStyle(fontSize: 15),
                             ),
                             Icon(Icons.location_pin)

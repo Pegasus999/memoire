@@ -14,7 +14,6 @@ class User {
   Zone? zone;
   String picture = '';
   List<Kid>? kids;
-  List<Notifications> notifications = [];
 
   User.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -28,10 +27,7 @@ class User {
             ? DateTime.parse(json['subscription'])
             : null, //
         zone = json['zone'] != null ? Zone.fromJson(json['zone']) : null,
-        kids = json['kids'] != null ? Kid.parseKids(json['kids']) : null,
-        notifications = json['notifications'] != null
-            ? Notifications.parseNotif(json['notifications'])
-            : [];
+        kids = json['kids'] != null ? Kid.parseKids(json['kids']) : null;
 
   static List<User> parseUser(List<dynamic> users) {
     return users.map((json) => User.fromJson(json)).toList();

@@ -5,6 +5,7 @@ import 'package:admins/Models/Notification.dart';
 import 'package:admins/Models/User.dart';
 import 'package:admins/Screens/EmployeeScreen.dart';
 import 'package:admins/Screens/RegisterScreen.dart';
+import 'package:admins/Services/Api.dart';
 import 'package:flutter/material.dart';
 import 'package:admins/Screens/KidsScreen.dart';
 import 'package:admins/Screens/LoginScreen.dart';
@@ -29,50 +30,35 @@ class _KidsListScreenState extends State<HomePage> {
   List<Notifications>? notifications;
   List<User>? users;
 
-  Future<List<Kid>> getKids() async {
-    var baseUrl = "http://10.0.2.2:5000/api/";
-    var type = "kids/getAll";
-    var url = Uri.parse('${baseUrl}${type}');
-    var response = await http.get(url);
-    var data = jsonDecode(response.body);
-    if (data.runtimeType == String) {
-      throw Exception();
-    }
-    setState(() {
-      kids = Kid.parseKids(data);
-    });
-    return Kid.parseKids(data);
+  @override
+  void initState() {
+    super.initState();
+    loadData();
   }
 
-  Future<List<Notifications>> getNotifications() async {
-    var baseUrl = "http://10.0.2.2:5000/api/";
-    var type = "notif/getAll";
-    var url = Uri.parse('${baseUrl}${type}');
-    var response = await http.get(url);
-    var data = jsonDecode(response.body);
-
-    if (data.runtimeType == String) {
-      throw Exception();
-    }
+  void updateNotificationsState(List<Notifications> loadedNotif) {
     setState(() {
-      notifications = Notifications.parseNotif(data);
+      notifications = loadedNotif;
     });
-    return Notifications.parseNotif(data);
   }
 
-  Future<List<User>> getUsers() async {
-    var baseUrl = "http://10.0.2.2:5000/api/";
-    var type = "user/getAll";
-    var url = Uri.parse('${baseUrl}${type}');
-    var response = await http.get(url);
-    var data = jsonDecode(response.body);
-    if (data.runtimeType == String) {
-      throw Exception();
-    }
+  void updateUsersState(List<User> loadedUsers) {
     setState(() {
-      users = User.parseUser(data);
+      users = loadedUsers;
     });
-    return User.parseUser(data);
+  }
+
+  void updateKidsState(List<Kid> loadedKids) {
+    setState(() {
+      kids = loadedKids;
+    });
+  }
+
+  Future<void> loadData() async {
+    final loadedKids = await API.getKids(updateKidsState);
+    final loadedUsers = await API.getUsers(updateUsersState);
+    final loadedNotifications =
+        await API.getNotifications(updateNotificationsState);
   }
 
   @override
@@ -161,52 +147,55 @@ class _KidsListScreenState extends State<HomePage> {
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.8,
-              child: _showPopup
-                  ? _buildPopUp()
-                  : FutureBuilder(
-                      future: selected == "List"
-                          ? getKids()
-                          : selected == "notifications"
-                              ? getNotifications()
-                              : getUsers(),
-                      builder: (BuildContext context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          return ListView.builder(
-                            physics: BouncingScrollPhysics(),
-                            itemBuilder: (BuildContext context, int index) {
-                              return selected == "List"
-                                  ? KidsScreen(kid: kids![index])
-                                  : selected == "Notification"
-                                      ? NotificationScreen(
-                                          notification: notifications![index],
-                                          popUp: _showPopup,
-                                        )
-                                      : EmployeeScreen(index: index);
-                            },
-                            itemCount: selected == "List"
-                                ? kids!.length
-                                : selected == "notifications"
-                                    ? notifications!.length
-                                    : users!.length,
-                          );
-                        } else if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        } else {
-                          return Center(
-                            child: Text(
-                              selected == "List"
-                                  ? "No kids Found"
-                                  : selected == "Notification"
-                                      ? "No Notifications Found"
-                                      : "No Users Found",
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                          );
-                        }
+              child: FutureBuilder(
+                future: selected == "List"
+                    ? API.getKids(updateKidsState)
+                    : selected == "Notification"
+                        ? API.getNotifications(updateNotificationsState)
+                        : API.getUsers(updateUsersState),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    return ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemBuilder: (BuildContext context, int index) {
+                        return selected == "List"
+                            ? KidsScreen(kid: kids![index])
+                            : selected == "Notification"
+                                ? NotificationScreen(
+                                    notification: notifications![index],
+                                  )
+                                : EmployeeScreen(user: users![index]);
                       },
-                    ),
+                      itemCount: selected == "List"
+                          ? kids != null
+                              ? kids!.length
+                              : 0
+                          : selected == "Notification"
+                              ? notifications != null
+                                  ? notifications!.length
+                                  : 0
+                              : users != null
+                                  ? users!.length
+                                  : 0,
+                    );
+                  } else if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    return Center(
+                      child: Text(
+                        selected == "List"
+                            ? "No kids Found"
+                            : selected == "Notification"
+                                ? "No Notifications Found"
+                                : "No Users Found",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    );
+                  }
+                },
+              ),
             )
           ]),
         ));
@@ -475,13 +464,22 @@ class _KidsListScreenState extends State<HomePage> {
                           width: 300,
                           height: 140,
                           child: Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: TextField(
-                                style: TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                    label: Text('تفاصيل الاشعار'),
-                                    labelStyle: TextStyle(color: Colors.white)),
-                              ))),
+                            textDirection: TextDirection.rtl,
+                            child: TextFormField(
+                              maxLines: 4,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "تفاصيل",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )),
                       Padding(
                         padding: const EdgeInsets.only(left: 16.0),
                         child: Row(
@@ -493,7 +491,11 @@ class _KidsListScreenState extends State<HomePage> {
                                       BorderRadius.all(Radius.circular(8))),
                               width: 60,
                               height: 40,
-                              child: Center(child: Text("تاكيد")),
+                              child: Center(
+                                  child: Text(
+                                "تاكيد",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
                             )
                           ],
                           mainAxisAlignment: MainAxisAlignment.start,

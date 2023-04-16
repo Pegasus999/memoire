@@ -1,11 +1,12 @@
+import 'package:admins/Models/User.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../constant.dart';
 
 class EmployeeScreen extends StatefulWidget {
-  const EmployeeScreen({Key? key, required this.index}) : super(key: key);
-  final int index;
+  const EmployeeScreen({Key? key, required this.user}) : super(key: key);
+  final User user;
   @override
   State<EmployeeScreen> createState() => _KidsScreenState();
 }
@@ -34,7 +35,7 @@ class _KidsScreenState extends State<EmployeeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        "أسم الموظف",
+                        "${widget.user.name} ${widget.user.lastname}",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       SizedBox(height: 10),
@@ -62,18 +63,11 @@ class _KidsScreenState extends State<EmployeeScreen> {
                                     size: 15,
                                   ),
                                   SizedBox(width: 5),
-                                  Text("0556996758")
+                                  Text("${widget.user.phone}")
                                 ],
                               ),
                             ),
                           ),
-                          SizedBox(width: 20),
-                          Text(
-                            "الوظيفة",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          SizedBox(width: 10),
-                          FaIcon(FontAwesomeIcons.clipboard)
                         ],
                       )
                     ]),

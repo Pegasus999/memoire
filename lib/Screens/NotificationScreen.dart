@@ -6,12 +6,9 @@ import 'package:flutter/material.dart';
 import '../constant.dart';
 
 class NotificationScreen extends StatefulWidget {
-  NotificationScreen(
-      {Key? key, required this.notification, required this.popUp})
-      : super(key: key);
+  NotificationScreen({Key? key, required this.notification}) : super(key: key);
   final Notifications notification;
 
-  bool popUp;
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
