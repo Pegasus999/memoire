@@ -26,7 +26,8 @@ class User {
         subscription = json['subscription'] != null
             ? DateTime.parse(json['subscription'])
             : null, //
-        zone = json['zone'] != null ? Zone.fromJson(json['zone']) : null,
+        zone =
+            json['zone'] != null ? Zone.fromJson({"name": json['zone']}) : null,
         kids = json['kids'] != null ? Kid.parseKids(json['kids']) : null;
 
   static List<User> parseUser(List<dynamic> users) {

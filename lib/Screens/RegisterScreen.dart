@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:admins/Models/Zone.dart';
 import 'package:admins/Models/Flags.dart';
 import 'package:admins/Models/Kid.dart';
 import 'package:admins/Models/User.dart';
@@ -25,14 +27,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController adressController = TextEditingController();
-  TextEditingController zoneController = TextEditingController();
   TextEditingController kidnameController = TextEditingController();
-  TextEditingController gradeController = TextEditingController();
   TextEditingController birthdayController = TextEditingController();
   TextEditingController flagTitleController = TextEditingController();
   TextEditingController flagDetailsController = TextEditingController();
+  String grade = "الاولى";
+  String zone = '';
   bool _ready = false;
   List<Kid> kids = [];
+  List<Zone> zones = [];
   int page = 0;
   int _page = 0;
   User? account;
@@ -46,12 +49,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     Auth("موظف", "EMPLOYEE"),
   ];
   List<Map<String, String>> flags = [];
+  List<String> grades = ["الاولى", "الثانية", "الثالثة", "الرابعة"];
 
   _checkFields() {
     if (_page == 1) {
       setState(() {
         _ready = kidnameController.text.isNotEmpty &&
-            gradeController.text.isNotEmpty &&
             birthdayController.text.isNotEmpty;
       });
     } else if (page == 0) {
@@ -69,19 +72,46 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    // ignore: unused_local_variable
+    final loadedZones = await API.getZones(updateZonesState);
+  }
+
+  void updateZonesState(List<Zone> loadedZones) {
+    setState(() {
+      zones = loadedZones;
+    });
+  }
+
 // TODO: complete get the new account's id after making it , then continue figuring shit out ,
   _createKid() {
-    kids.add(Kid.fromJson({
+    var json = {
       "id": "",
+      "userId": account!.id,
       "name": kidnameController.text,
-      "lastname": "راتن",
-      "User": {"phone": phoneController.text},
-      "userId": "a64031bd-1aab-46a7-9058-654917333e15",
-      "grade": gradeController.text,
+      "lastname": lastnameController.text,
+      "User": {"phone": phoneController.text, "zone": zone},
+      "grade": grade,
       "birthday": _birthdayConvert().toString(),
       "position": "HOME",
-      "picture": '',
-    }));
+      "picture": "",
+    };
+    Kid kid = Kid.fromJson(json);
+    kids.add(kid);
+    Fluttertoast.showToast(
+        msg: "Kid Added",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   _birthdayConvert() {
@@ -94,23 +124,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   _createUser() async {
-    var user = await API.addUser(
-        usernameController.text,
-        passwordController.text,
-        nameController.text,
-        lastnameController.text,
-        phoneController.text,
-        adressController.text,
-        zoneController.text,
-        authority);
-    dynamic decodedJson = jsonDecode(user);
-    if (decodedJson is! String) {
-      setState(() {
-        account = User.fromJson(decodedJson);
-      });
-    } else {
-      print('Request failed with error: $decodedJson');
-    }
+    final user = User.fromJson({
+      "id": account != null ? account!.id : "",
+      'name': nameController.text,
+      'lastname': lastnameController.text,
+      'phone': phoneController.text,
+      'adress': adressController.text,
+      'auth': authority,
+      'picture': "",
+    });
+    final res = await API.addUser(user, usernameController.text,
+        passwordController.text, authority, zone);
+    setState(() {
+      account = User.fromJson(res['result']);
+    });
+
+    Fluttertoast.showToast(
+        msg: "${res['message']}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   _createFlag() {
@@ -124,8 +160,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       flagDetailsController.text = "";
       flagTitleController.text = "";
     }
-    print(flags);
-    print(kids);
   }
 
   @override
@@ -175,7 +209,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text("اسم الطفل"),
+                        Text(
+                          "${kids[index].name}",
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
                         SizedBox(width: 20),
                         CircleAvatar(
                           radius: 50,
@@ -185,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             );
           },
-          itemCount: 1,
+          itemCount: kids.length,
         )),
         GestureDetector(
           child: Padding(
@@ -196,7 +233,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
                   borderRadius: BorderRadius.all(Radius.circular(16))),
-              child: Center(child: FaIcon(FontAwesomeIcons.plus)),
+              child: Center(
+                  child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _page = 1;
+                        });
+                        kidnameController.text = '';
+                        grade = '';
+                        birthdayController.text = '';
+                      },
+                      child: FaIcon(FontAwesomeIcons.plus))),
             ),
           ),
         ),
@@ -209,8 +256,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               GestureDetector(
                 onTap: () {
                   setState(() {
-                    _page = 1;
+                    _page = 2;
                   });
+                  kids.removeLast();
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -357,11 +405,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // setState(() {
-                      //   _page = 3;
-                      // });
-
-                      API.addKid(kids.last, flags);
+                      _createKid();
+                      setState(() {
+                        _page = 3;
+                      });
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -426,9 +473,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(height: 60),
                     _input("الاسم", false, kidnameController),
                     SizedBox(height: 20),
-                    _input("المستوى", false, gradeController),
-                    SizedBox(height: 20),
                     _input("تاريخ الميلاد", false, birthdayController),
+                    SizedBox(height: 20),
+                    _zoneShips(1)
                   ]),
             )),
             Container(
@@ -440,7 +487,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        page = 1;
+                        _page = 0;
                       });
                     },
                     child: Padding(
@@ -460,7 +507,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         setState(() {
                           _page = 2;
                         });
-                        _createKid();
                       }
                     },
                     child: Padding(
@@ -588,10 +634,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _input("رقم الهاتف", false, phoneController),
                   SizedBox(height: 10),
                   _input("العنوان", false, adressController),
-                  SizedBox(height: 10),
-                  authority != "EMPLOYEE"
-                      ? _input("المنطقة", false, zoneController)
-                      : null,
+                  SizedBox(height: 20),
+                  authority != "EMPLOYEE" ? _zoneShips(0) : null,
                 ],
               )),
           Container(
@@ -618,11 +662,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   GestureDetector(
                     onTap: () {
                       if (_ready) {
+                        _createUser();
                         setState(() {
                           page = 2;
                           _ready = false;
                         });
-                        _createUser();
                       }
                     },
                     child: Padding(
@@ -808,6 +852,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Text("${auth.label}"),
           ),
         ),
+      ),
+    );
+  }
+
+  _zoneShips(int num) {
+    return Container(
+      height: 60,
+      child: ListView.builder(
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  num == 0
+                      ? setState(() {
+                          zone = zones[index].name;
+                        })
+                      : setState(() {
+                          grade = grades[index];
+                        });
+                },
+                child: Container(
+                  width: 100,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: num == 0
+                        ? zones[index].name != zone
+                            ? Constant.Blue
+                            : Color.fromRGBO(0, 119, 181, 0.5)
+                        : grades[index] != grade
+                            ? Constant.Blue
+                            : Color.fromRGBO(0, 119, 181, 0.5),
+                  ),
+                  child: Center(
+                    child:
+                        Text("${num == 0 ? zones[index].name : grades[index]}"),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        itemCount: num == 0 ? zones.length : grades.length,
+        scrollDirection: Axis.horizontal,
       ),
     );
   }

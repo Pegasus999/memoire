@@ -32,7 +32,7 @@ class Kid {
         flag = json['flags'] != null && json['flags'].length != 0
             ? Flag.parseFlags(json['flags'])
             : null,
-        zone = Zone.fromJson(json['User']["zone"]);
+        zone = Zone.fromJson({"name": json['User']['zone']['name']});
 
   static List<Kid> parseKids(List<dynamic> kids) {
     return kids.map((json) => Kid.fromJson(json)).toList();

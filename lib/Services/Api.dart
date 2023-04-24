@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
-import 'package:admins/Models/Flags.dart';
+import 'package:admins/Models/Zone.dart';
 import 'package:admins/Models/Kid.dart';
 import 'package:admins/Screens/HomePage.dart';
 import 'package:admins/constant.dart';
@@ -62,7 +63,6 @@ class API {
       return null;
     }
     List<Notifications> loadedNotif = Notifications.parseNotif(data);
-    print(loadedNotif);
     updateState(loadedNotif);
     return Notifications.parseNotif(data);
   }
@@ -85,25 +85,36 @@ class API {
     }
   }
 
-  static Future<String> addUser(
-      String username,
-      String password,
-      String name,
-      String lastname,
-      String phone,
-      String adress,
-      String zone,
-      String authority) async {
+  static Future<List<Zone>?> getZones(Function(List<Zone>) updateState) async {
+    try {
+      var url = Uri.parse('http://10.0.2.2:5000/api/user/getZones');
+      var response = await http.get(url);
+      var data = jsonDecode(response.body);
+      if (data.runtimeType == String) {
+        return null;
+      }
+      List<Zone> loadedZones = Zone.parseZones(data);
+      print(loadedZones);
+      updateState(loadedZones);
+      return loadedZones;
+    } catch (err) {
+      throw Exception("$err");
+    }
+  }
+
+  static Future<Map<String, dynamic>> addUser(User user, String username,
+      String password, String authority, String zone) async {
     try {
       final headers = {'Content-Type': 'application/json'};
       final url = Uri.parse('http://10.0.2.2:5000/api/user/addUser');
       final body = jsonEncode({
+        'id': user.id,
         'username': username,
         'password': password,
-        'name': name,
-        'lastname': lastname,
-        'phone': phone,
-        'adress': adress,
+        'name': user.name,
+        'lastname': user.lastname,
+        'phone': user.phone,
+        'adress': user.adress,
         'zone': zone,
         'auth': authority,
       });
@@ -111,13 +122,13 @@ class API {
       final response = await http.post(url, headers: headers, body: body);
       final result = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return jsonEncode(User.fromJson(result.result));
+        return result;
       } else {
-        return 'Request failed with status: ${response.statusCode}.';
+        throw Exception('Request failed with status: ${response.statusCode}.');
       }
     } catch (error) {
-      //   // Handle any exceptions that occurred during the request
-      return 'Request failed with error: $error';
+      // Handle any exceptions that occurred during the request
+      throw Exception('$error');
     }
   }
 
