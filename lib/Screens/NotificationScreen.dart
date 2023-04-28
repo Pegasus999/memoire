@@ -51,7 +51,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                "20/03/2023",
+                                "${widget.notification.date.toLocal()}",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600),
@@ -67,7 +67,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'عنوان الاشعار',
+                              "${widget.notification.title}",
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -83,7 +83,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              "هذا مكان تفاصيل الاشعارت",
+                              "${widget.notification.content}",
                               style: TextStyle(
                                   color: Colors.white.withOpacity(0.9),
                                   fontSize: 16),

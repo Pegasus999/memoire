@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:admins/Screens/HomePage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:admins/Models/Zone.dart';
 import 'package:admins/Models/Flags.dart';
@@ -12,6 +13,13 @@ import 'package:admins/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+
+class Add {
+  Kid kid;
+  List<Map<String, String>> flags;
+  XFile? kidImage;
+  Add(this.kid, this.flags, this.kidImage);
+}
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key, required this.user});
@@ -36,6 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _ready = false;
   List<Kid> kids = [];
   List<Zone> zones = [];
+  List<Add> list = [];
   int page = 0;
   int _page = 0;
   User? account;
@@ -55,14 +64,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_page == 1) {
       setState(() {
         _ready = kidnameController.text.isNotEmpty &&
-            birthdayController.text.isNotEmpty;
+            birthdayController.text.isNotEmpty &&
+            kidImage != null;
       });
     } else if (page == 0) {
       setState(() {
         _ready = usernameController.text.isNotEmpty &&
             passwordController.text.isNotEmpty &&
             nameController.text.isNotEmpty &&
-            lastnameController.text.isNotEmpty;
+            lastnameController.text.isNotEmpty &&
+            accountImage != null;
       });
     } else if (page == 1) {
       setState(() {
@@ -96,7 +107,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "userId": account!.id,
       "name": kidnameController.text,
       "lastname": lastnameController.text,
-      "User": {"phone": phoneController.text, "zone": zone},
+      "User": {
+        "phone": phoneController.text,
+        "zone": {"name": zone}
+      },
       "grade": grade,
       "birthday": _birthdayConvert().toString(),
       "position": "HOME",
@@ -104,6 +118,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     };
     Kid kid = Kid.fromJson(json);
     kids.add(kid);
+    list.add(Add(kid, flags, kidImage));
+    flags = [];
+    kidImage = null;
+    setState(() {
+      _ready = false;
+    });
+
     Fluttertoast.showToast(
         msg: "Kid Added",
         toastLength: Toast.LENGTH_SHORT,
@@ -162,6 +183,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  _confirm() async {
+    // for (int i = 0; i < list.length; i++) {
+    //   await API.addKid(list[i].kid, list[i].flags, list[i].kidImage);
+    // }
+    Fluttertoast.showToast(
+        msg: "Kids Added",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ResultScreen(user: widget.user)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -216,6 +255,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(width: 20),
                         CircleAvatar(
                           radius: 50,
+                          backgroundImage: list[index].kidImage != null
+                              ? FileImage(File(list[index].kidImage!.path))
+                              : null,
                         )
                       ]),
                 ),
@@ -270,12 +312,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: ((context) => RegisterScreen(
-                                user: widget.user,
-                              ))));
+                  _confirm();
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -308,7 +345,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    CircleAvatar(radius: 80),
+                    CircleAvatar(
+                      radius: 80,
+                      backgroundImage: kidImage != null
+                          ? FileImage(File(kidImage!.path))
+                          : null,
+                    ),
                     SizedBox(height: 20),
                     Text("${kidnameController.text} ${lastnameController.text}",
                         style: TextStyle(
@@ -449,25 +491,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                       child: CircleAvatar(
                         radius: 80,
-                        child: kidImage != null
-                            ? Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    //to show image, you type like this.
-                                    File(kidImage!.path),
-                                    fit: BoxFit.cover,
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 300,
-                                  ),
-                                ),
-                              )
-                            : Text(
-                                "No Image",
-                                style: TextStyle(fontSize: 20),
-                              ),
+                        backgroundImage: kidImage != null
+                            ? FileImage(File(kidImage!.path))
+                            : null,
+                        child: accountImage == null ? Text("لا صورة") : null,
                       ),
                     ),
                     SizedBox(height: 60),
@@ -600,24 +627,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 CircleAvatar(
                   radius: 100,
-                  child: kidImage != null
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              //to show image, you type like this.
-                              File(kidImage!.path),
-                              fit: BoxFit.cover,
-                              width: MediaQuery.of(context).size.width,
-                              height: 300,
-                            ),
-                          ),
-                        )
-                      : Text(
-                          "No Image",
-                          style: TextStyle(fontSize: 20),
-                        ),
+                  backgroundImage: accountImage != null
+                      ? FileImage(File(accountImage!.path))
+                      : null,
                 ),
                 SizedBox(height: 20),
                 Text("${nameController.text} ${lastnameController.text}",
@@ -706,24 +718,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                   child: CircleAvatar(
                     radius: 100,
-                    child: accountImage != null
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                //to show image, you type like this.
-                                File(accountImage!.path),
-                                fit: BoxFit.cover,
-                                width: MediaQuery.of(context).size.width,
-                                height: 300,
-                              ),
-                            ),
-                          )
-                        : Text(
-                            "No Image",
-                            style: TextStyle(fontSize: 20),
-                          ),
+                    backgroundImage: accountImage != null
+                        ? FileImage(File(accountImage!.path))
+                        : null,
+                    child: accountImage == null ? Text("لا صورة") : null,
                   ),
                 ),
               ),

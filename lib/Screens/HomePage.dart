@@ -11,6 +11,7 @@ import 'package:admins/Screens/KidsScreen.dart';
 import 'package:admins/Screens/LoginScreen.dart';
 import 'package:admins/Screens/NotificationScreen.dart';
 import 'package:admins/constant.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -25,6 +26,8 @@ class _KidsListScreenState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool search = false;
   bool _showPopup = false;
+  TextEditingController titleController = TextEditingController();
+  TextEditingController detailsController = TextEditingController();
   String selected = "List";
   List<Kid>? kids;
   List<Notifications>? notifications;
@@ -70,9 +73,7 @@ class _KidsListScreenState extends State<HomePage> {
             ? FloatingActionButton(
                 backgroundColor: Constant.Blue,
                 onPressed: () {
-                  setState(() {
-                    _showPopup = true;
-                  });
+                  _MyAlert();
                 },
                 child: FaIcon(FontAwesomeIcons.plus),
               )
@@ -409,82 +410,88 @@ class _KidsListScreenState extends State<HomePage> {
             ))));
   }
 
-  _buildPopUp() {
-    return AnimatedOpacity(
-        duration: Duration(milliseconds: 500),
-        opacity: _showPopup ? 1.0 : 0.0,
-        child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-            child: Center(
-              child: Container(
+  _showToast(String message) {
+    Fluttertoast.showToast(
+        msg: "${message}",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
+  _MyAlert() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              content: Container(
                 height: MediaQuery.of(context).size.height * 0.4,
-                width: MediaQuery.of(context).size.width * 0.9,
-                decoration: BoxDecoration(
-                    color: Constant.Blue,
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
-                child: Column(children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0, right: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _showPopup = false;
-                              });
-                            },
-                            child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _showPopup = false;
-                                  });
-                                },
-                                child: FaIcon(FontAwesomeIcons.xmark)))
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Form(
-                      child: Column(
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                          width: 300,
-                          child: Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: TextField(
-                                style: TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                    label: Text('عنوان الاشعار'),
-                                    labelStyle: TextStyle(color: Colors.white)),
-                              ))),
-                      SizedBox(height: 20),
-                      Container(
-                          width: 300,
-                          height: 140,
-                          child: Directionality(
-                            textDirection: TextDirection.rtl,
-                            child: TextFormField(
-                              maxLines: 4,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "تفاصيل",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: Row(
+                      Text(
+                        "اضافة اشعار",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 30),
+                      Expanded(
+                        child: Column(
                           children: [
                             Container(
+                                width: 300,
+                                child: Directionality(
+                                    textDirection: TextDirection.rtl,
+                                    child: TextField(
+                                      controller: titleController,
+                                      style: TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                          label: Text('عنوان الاشعار'),
+                                          labelStyle:
+                                              TextStyle(color: Colors.black)),
+                                    ))),
+                            SizedBox(height: 20),
+                            Container(
+                                width: 300,
+                                height: 140,
+                                child: Directionality(
+                                  textDirection: TextDirection.rtl,
+                                  child: TextFormField(
+                                    controller: detailsController,
+                                    maxLines: 4,
+                                    decoration: InputDecoration(
+                                      label: Text(
+                                        "تفاصيل",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(8),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              if (titleController.text.isNotEmpty &&
+                                  detailsController.text.isNotEmpty)
+                                _showToast(await API.addNotification(
+                                    titleController.text,
+                                    detailsController.text));
+                            },
+                            child: Container(
                               decoration: BoxDecoration(
                                   color: Constant.Background,
                                   borderRadius:
@@ -496,16 +503,14 @@ class _KidsListScreenState extends State<HomePage> {
                                 "تاكيد",
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               )),
-                            )
-                          ],
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                        ),
+                            ),
+                          )
+                        ],
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                       )
-                    ],
-                  ))
-                ]),
-              ),
-            )));
+                    ]),
+              ));
+        });
   }
 }

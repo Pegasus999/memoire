@@ -91,7 +91,7 @@ class _KidsScreenState extends State<KidsScreen> {
                 child: Center(
                     child: CircleAvatar(
                   radius: 50, // set the radius as per your requirement
-                  backgroundImage: NetworkImage("https://picsum.photos/130"),
+                  backgroundImage: NetworkImage(widget.kid.picture),
                 )))
           ]),
         ),

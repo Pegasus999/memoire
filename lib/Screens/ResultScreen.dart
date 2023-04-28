@@ -28,8 +28,10 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text("Account added succefully"),
+    return Scaffold(
+      body: Center(
+        child: Text("Account added succefully"),
+      ),
     );
   }
 }
