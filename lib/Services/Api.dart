@@ -181,4 +181,16 @@ class API {
       return 'Request failed with error: $error';
     }
   }
+
+  static Future<String> updateAllPosition(
+      String newPosition, String zone) async {
+    try {
+      final url = Uri.parse('http://192.168.43.25:5000/api/kid/updateAll');
+      final body = jsonEncode({"position": newPosition, "zone": zone});
+      final response = await http.put(url);
+      return "Position Updated";
+    } catch (err) {
+      return "Request failed";
+    }
+  }
 }

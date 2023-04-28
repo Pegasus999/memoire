@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:admins/Models/Kid.dart';
 import 'package:admins/constant.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 
@@ -41,7 +42,10 @@ class _KidDetailScreenState extends State<KidDetailScreen> {
                           onTap: () {
                             Navigator.pop(context);
                           },
-                          child: FaIcon(FontAwesomeIcons.arrowLeft))
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: FaIcon(FontAwesomeIcons.arrowLeft),
+                          ))
                     ],
                   ),
                 ),
@@ -52,7 +56,7 @@ class _KidDetailScreenState extends State<KidDetailScreen> {
                   Expanded(
                     flex: 6,
                     child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
@@ -60,11 +64,11 @@ class _KidDetailScreenState extends State<KidDetailScreen> {
                             style: TextStyle(color: Colors.white, fontSize: 30),
                           ),
                           Text(
-                            "تاريخ الميلاد : ${widget.kid.birthday}",
+                            "تاريخ الميلاد : ${DateFormat('dd/MM/yyyy').format(widget.kid.birthday)}",
                             style: TextStyle(color: Colors.white, fontSize: 15),
                           ),
                           Text(
-                            "${widget.kid.zone}",
+                            "${widget.kid.zone.name}",
                             style: TextStyle(color: Colors.white, fontSize: 15),
                           ),
                           Text(
@@ -86,10 +90,14 @@ class _KidDetailScreenState extends State<KidDetailScreen> {
                         ]),
                   ),
                   Expanded(
-                      flex: 4,
-                      child: Center(
-                        child: CircleAvatar(radius: 60),
-                      ))
+                    flex: 4,
+                    child: Center(
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: NetworkImage(widget.kid.picture),
+                      ),
+                    ),
+                  )
                 ],
               ))
             ],

@@ -1,12 +1,15 @@
+import 'package:admins/Models/User.dart';
 import 'package:admins/Screens/DriversList.dart';
 import 'package:admins/Screens/LoginScreen.dart';
+import 'package:admins/Services/Api.dart';
 import 'package:admins/constant.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DriverScreen extends StatefulWidget {
-  const DriverScreen({super.key});
-
+  const DriverScreen({super.key, required this.user});
+  final User user;
   @override
   State<DriverScreen> createState() => _DriverScreenState();
 }
@@ -22,7 +25,8 @@ class _DriverScreenState extends State<DriverScreen> {
       "text": Text(
         "في المنزل",
         style: TextStyle(color: Color.fromRGBO(40, 3, 43, 1), fontSize: 60),
-      )
+      ),
+      "position": "HOME"
     },
     {
       "icon": FaIcon(
@@ -33,7 +37,8 @@ class _DriverScreenState extends State<DriverScreen> {
       "text": Text(
         "في الطريق",
         style: TextStyle(color: Color.fromRGBO(159, 49, 46, 1), fontSize: 60),
-      )
+      ),
+      "position": "ROAD"
     },
     {
       "icon": FaIcon(
@@ -44,7 +49,8 @@ class _DriverScreenState extends State<DriverScreen> {
       "text": Text(
         "في الروضة",
         style: TextStyle(color: Color.fromRGBO(60, 222, 87, 1), fontSize: 60),
-      )
+      ),
+      "position": "DAYCARE"
     },
     {
       "icon": FaIcon(
@@ -55,12 +61,13 @@ class _DriverScreenState extends State<DriverScreen> {
       "text": Text(
         "في الطريق",
         style: TextStyle(color: Color.fromRGBO(159, 49, 46, 1), fontSize: 60),
-      )
+      ),
+      "position": "ROAD"
     },
   ];
   int state = 0;
 
-  _handleState() {
+  _handleState() async {
     if (state == 3) {
       setState(() {
         state = 0;
@@ -70,6 +77,17 @@ class _DriverScreenState extends State<DriverScreen> {
         state++;
       });
     }
+    String message = await API.updateAllPosition(
+        icons[state]['position'], widget.user.zone!.name);
+
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   @override
@@ -96,7 +114,7 @@ class _DriverScreenState extends State<DriverScreen> {
                 Expanded(
                     child: Center(
                         child: Text(
-                      "سيدي عمار",
+                      "${widget.user.zone!.name}",
                       style:
                           TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                     )),

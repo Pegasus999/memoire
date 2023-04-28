@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:ui';
 import 'package:admins/Models/Kid.dart';
 import 'package:admins/Models/Notification.dart';
 import 'package:admins/Models/User.dart';
@@ -12,7 +10,6 @@ import 'package:admins/Screens/LoginScreen.dart';
 import 'package:admins/Screens/NotificationScreen.dart';
 import 'package:admins/constant.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,6 +27,10 @@ class _KidsListScreenState extends State<HomePage> {
   TextEditingController detailsController = TextEditingController();
   String selected = "List";
   List<Kid>? kids;
+  int kidsLoader = 0;
+  int usersLoader = 0;
+  List<Kid>? untouchedKids;
+  List<User>? untouchedUsers;
   List<Notifications>? notifications;
   List<User>? users;
 
@@ -46,15 +47,23 @@ class _KidsListScreenState extends State<HomePage> {
   }
 
   void updateUsersState(List<User> loadedUsers) {
-    setState(() {
-      users = loadedUsers;
-    });
+    if (usersLoader == 0) {
+      setState(() {
+        users = loadedUsers;
+        untouchedUsers = loadedUsers;
+        usersLoader = 1;
+      });
+    }
   }
 
   void updateKidsState(List<Kid> loadedKids) {
-    setState(() {
-      kids = loadedKids;
-    });
+    if (kidsLoader == 0) {
+      setState(() {
+        kids = loadedKids;
+        untouchedKids = loadedKids;
+        kidsLoader = 1;
+      });
+    }
   }
 
   Future<void> loadData() async {
@@ -116,13 +125,16 @@ class _KidsListScreenState extends State<HomePage> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Row(children: [
-                          FaIcon(FontAwesomeIcons.magnifyingGlass),
-                          SizedBox(width: 10),
-                          Visibility(
-                              visible: search,
-                              child: _buildInputField("اسم", false))
-                        ]),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(children: [
+                            FaIcon(FontAwesomeIcons.magnifyingGlass),
+                            SizedBox(width: 10),
+                            Visibility(
+                                visible: search,
+                                child: _buildInputField("اسم", false))
+                          ]),
+                        ),
                       ),
                     )),
                   ),
@@ -233,8 +245,7 @@ class _KidsListScreenState extends State<HomePage> {
                     SizedBox(width: 20),
                     CircleAvatar(
                       radius: 50, // set the radius as per your requirement
-                      backgroundImage:
-                          NetworkImage("https://picsum.photos/130"),
+                      backgroundImage: NetworkImage(widget.user.picture),
                     )
                   ],
                 ),
@@ -402,12 +413,41 @@ class _KidsListScreenState extends State<HomePage> {
         child: Directionality(
             textDirection: TextDirection.rtl,
             child: TextField(
-              style: TextStyle(color: Colors.white),
+              onChanged: (value) {
+                _filter(value);
+              },
+              style: TextStyle(color: Colors.black),
               obscureText: pass,
               decoration: InputDecoration(
-                  label: Text(label),
-                  labelStyle: TextStyle(color: Colors.black)),
+                  hintText: label, hintStyle: TextStyle(color: Colors.black)),
             ))));
+  }
+
+  _filter(String value) {
+    if (value == '') {
+      selected == "List"
+          ? setState(() {
+              kids = untouchedKids;
+            })
+          : setState(() {
+              users = untouchedUsers;
+            });
+    } else {
+      selected == "List"
+          ? setState(() {
+              kids = untouchedKids!
+                  .where((kid) =>
+                      kid.name.contains(value) || kid.lastname.contains(value))
+                  .toList();
+            })
+          : setState(() {
+              users = untouchedUsers!
+                  .where((user) =>
+                      user.name.contains(value) ||
+                      user.lastname.contains(value))
+                  .toList();
+            });
+    }
   }
 
   _showToast(String message) {

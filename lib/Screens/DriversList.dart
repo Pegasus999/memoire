@@ -1,3 +1,4 @@
+import 'package:admins/Models/Kid.dart';
 import 'package:admins/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,9 +10,10 @@ class DriversList extends StatefulWidget {
   State<DriversList> createState() => _DriversListState();
 }
 
+// TODO: request the list of kids in the related zone , and figure out how to update their position per click , also remove the place holders
 class _DriversListState extends State<DriversList> {
   int state = 0;
-
+  List<Kid>? kids = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
