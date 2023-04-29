@@ -93,11 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'كلمة السر', true, passwordController),
                               SizedBox(height: 60),
                               TextButton(
-                                onPressed: () async => {
-                                  await API.login(usernameController.text,
-                                      passwordController.text, context)
-                                  // _handleSubmit()
-                                },
+                                onPressed: () => {_login()},
                                 child: Text(
                                   "دخول",
                                   style: TextStyle(
@@ -237,8 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _handleSubmit() async {
-    // Navigator.push(
-    //     context, MaterialPageRoute(builder: ((context) => RegisterScreen())));
+  Future<void> _login() async {
+    await API.login(usernameController.text, passwordController.text, context);
   }
 }

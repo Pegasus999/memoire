@@ -51,7 +51,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                "${widget.notification.date.toLocal()}",
+                                "${widget.notification.date}",
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600),

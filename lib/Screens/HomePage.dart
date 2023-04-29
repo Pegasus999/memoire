@@ -80,7 +80,7 @@ class _KidsListScreenState extends State<HomePage> {
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         floatingActionButton: selected == "Notification" && !_showPopup
             ? FloatingActionButton(
-                backgroundColor: Constant.Blue,
+                elevation: 10,
                 onPressed: () {
                   _MyAlert();
                 },
@@ -158,8 +158,7 @@ class _KidsListScreenState extends State<HomePage> {
                 ],
               ),
             ),
-            Container(
-              height: MediaQuery.of(context).size.height * 0.8,
+            Expanded(
               child: FutureBuilder(
                 future: selected == "List"
                     ? API.getKids(updateKidsState)
@@ -251,10 +250,12 @@ class _KidsListScreenState extends State<HomePage> {
                 ),
               ),
             ),
-            widget.user.auth == "EMPLOYEE"
+            widget.user.auth == "WORKER"
                 ? Expanded(
                     flex: 4,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -268,7 +269,7 @@ class _KidsListScreenState extends State<HomePage> {
                                   fontWeight: FontWeight.w700),
                             ),
                             Text(
-                              '3',
+                              '${kids!.length}',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
@@ -347,8 +348,13 @@ class _KidsListScreenState extends State<HomePage> {
             child: Center(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: ((context) => LoginScreen())));
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => const LoginScreen()),
+                    (Route<dynamic> route) =>
+                        false, // Remove all the routes in the stack
+                  );
                 },
 
                 style: ButtonStyle(
@@ -490,7 +496,7 @@ class _KidsListScreenState extends State<HomePage> {
                                     textDirection: TextDirection.rtl,
                                     child: TextField(
                                       controller: titleController,
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(color: Colors.black),
                                       decoration: InputDecoration(
                                           label: Text('عنوان الاشعار'),
                                           labelStyle:
@@ -530,6 +536,9 @@ class _KidsListScreenState extends State<HomePage> {
                                 _showToast(await API.addNotification(
                                     titleController.text,
                                     detailsController.text));
+                              Navigator.of(context).pop();
+                              titleController.text = "";
+                              detailsController.text = '';
                             },
                             child: Container(
                               decoration: BoxDecoration(

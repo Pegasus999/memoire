@@ -1,11 +1,12 @@
 class Notifications {
   String title = "";
   String content = "";
-  DateTime date = DateTime.now();
+  String date;
 
   Notifications.fromJson(Map<String, dynamic> json)
       : title = json['title'],
-        content = json['content'];
+        content = json['content'],
+        date = json['date'];
 
   static List<Notifications> parseNotif(List<dynamic> notifications) {
     return notifications.map((json) => Notifications.fromJson(json)).toList();

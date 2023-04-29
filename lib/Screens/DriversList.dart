@@ -1,19 +1,38 @@
 import 'package:admins/Models/Kid.dart';
+import 'package:admins/Models/User.dart';
+import 'package:admins/Services/Api.dart';
 import 'package:admins/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DriversList extends StatefulWidget {
-  const DriversList({super.key});
-
+  const DriversList({super.key, required this.user});
+  final User user;
   @override
   State<DriversList> createState() => _DriversListState();
 }
 
 // TODO: request the list of kids in the related zone , and figure out how to update their position per click , also remove the place holders
 class _DriversListState extends State<DriversList> {
-  int state = 0;
   List<Kid>? kids = [];
+
+  void updateKidsState(List<Kid> loadedKids) {
+    setState(() {
+      kids = loadedKids;
+    });
+  }
+
+  Future<void> loadData() async {
+    final loadedKids =
+        await API.getZoneRelatedKids(updateKidsState, widget.user.zone!.name);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +49,7 @@ class _DriversListState extends State<DriversList> {
                   Expanded(
                     child: Center(
                         child: Text(
-                      "5",
+                      "${kids!.length}",
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                     )),
@@ -39,7 +58,7 @@ class _DriversListState extends State<DriversList> {
                   Expanded(
                       child: Center(
                           child: Text(
-                        "سيدي عمار",
+                        "${widget.user.zone!.name}",
                         style: TextStyle(
                             fontSize: 17, fontWeight: FontWeight.w600),
                       )),
@@ -57,9 +76,30 @@ class _DriversListState extends State<DriversList> {
                 ],
               ),
             ),
-            Expanded(child: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                return _buildTile();
+            Expanded(
+                child: FutureBuilder(
+              future:
+                  API.getZoneRelatedKids((e) => null, widget.user.zone!.name),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return ListView.builder(
+                    itemBuilder: (BuildContext context, int index) {
+                      return _buildTile(index);
+                    },
+                    itemCount: kids!.length,
+                  );
+                } else if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else {
+                  return Center(
+                    child: Text(
+                      "No kids Found",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }
               },
             ))
           ],
@@ -68,19 +108,38 @@ class _DriversListState extends State<DriversList> {
     );
   }
 
-  _handleClick(int index) {
-    if (state != index) {
-      setState(() {
-        state = index;
-      });
+  _handleRoad(int index) {
+    List<Kid> updatedKids = List<Kid>.from(kids!);
+    if (kids![index].position == "في الطريق") {
+      updatedKids[index].position = 'في المنزل';
     } else {
-      setState(() {
-        state = 0;
-      });
+      updatedKids[index].position = "في الطريق";
     }
+    setState(() {
+      kids = updatedKids;
+    });
+    _updatedPosition(index);
   }
 
-  _buildTile() {
+  _handleDaycare(int index) {
+    List<Kid> updatedKids = List<Kid>.from(kids!);
+    if (kids![index].position == "في الروضة") {
+      updatedKids[index].position = 'في المنزل';
+    } else {
+      updatedKids[index].position = "في الروضة";
+    }
+    setState(() {
+      kids = updatedKids;
+    });
+    _updatedPosition(index);
+  }
+
+  _updatedPosition(int index) async {
+    String message =
+        await API.updateSinglePosition(kids![index].position, kids![index].id);
+  }
+
+  _buildTile(int index) {
     return Center(
       child: Container(
         margin: EdgeInsets.only(top: 8),
@@ -108,21 +167,27 @@ class _DriversListState extends State<DriversList> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              _handleClick(1);
+                              _handleRoad(index);
                             },
                             child: FaIcon(
                               FontAwesomeIcons.truck,
-                              color: state == 1 ? Colors.red : null,
+                              color: kids![index].position == "في الطريق"
+                                  ? Colors.red
+                                  : null,
+                              size: 30,
                             ),
                           ),
                           SizedBox(height: 20),
                           GestureDetector(
                             onTap: () {
-                              _handleClick(2);
+                              _handleDaycare(index);
                             },
                             child: FaIcon(
                               FontAwesomeIcons.faceSmile,
-                              color: state == 2 ? Colors.red : null,
+                              color: kids![index].position == "في الروضة"
+                                  ? Colors.red
+                                  : null,
+                              size: 30,
                             ),
                           )
                         ],
@@ -133,7 +198,7 @@ class _DriversListState extends State<DriversList> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            "أسم الطفل",
+                            "${kids![index].name} ${kids![index].lastname}",
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                           SizedBox(height: 10),
@@ -142,9 +207,7 @@ class _DriversListState extends State<DriversList> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                  // callNumber("tel:+213556996758");
-                                },
+                                onTap: () {},
                                 child: Container(
                                   width: 120,
                                   height: 30,
@@ -162,7 +225,7 @@ class _DriversListState extends State<DriversList> {
                                         size: 15,
                                       ),
                                       SizedBox(width: 5),
-                                      Text("0556996758")
+                                      Text("${kids![index].phone}")
                                     ],
                                   ),
                                 ),
@@ -178,7 +241,7 @@ class _DriversListState extends State<DriversList> {
               child: Center(
                   child: CircleAvatar(
                 radius: 50, // set the radius as per your requirement
-                backgroundImage: NetworkImage("https://picsum.photos/130"),
+                backgroundImage: NetworkImage("${kids![index].picture}"),
               )))
         ]),
       ),

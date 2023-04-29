@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:admins/Screens/HomePage.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:admins/Models/Zone.dart';
 import 'package:admins/Models/Flags.dart';
@@ -55,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final List<Auth> auth = [
     Auth("سائق", "DRIVER"),
     Auth("ولي", "PARENT"),
-    Auth("موظف", "EMPLOYEE"),
+    Auth("موظف", "WORKER"),
   ];
   List<Map<String, String>> flags = [];
   List<String> grades = ["الاولى", "الثانية", "الثالثة", "الرابعة"];
@@ -77,8 +78,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
     } else if (page == 1) {
       setState(() {
-        _ready =
-            phoneController.text.isNotEmpty && adressController.text.isNotEmpty;
+        _ready = phoneController.text.isNotEmpty &&
+            adressController.text.isNotEmpty &&
+            phoneController.text.length == 10;
       });
     }
   }
@@ -155,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'picture': "",
     });
     final res = await API.addUser(user, usernameController.text,
-        passwordController.text, authority, zone);
+        passwordController.text, authority, zone, accountImage);
     setState(() {
       account = User.fromJson(res['result']);
     });
@@ -184,17 +186,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   _confirm() async {
-    // for (int i = 0; i < list.length; i++) {
-    //   await API.addKid(list[i].kid, list[i].flags, list[i].kidImage);
-    // }
-    Fluttertoast.showToast(
-        msg: "Kids Added",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+    for (int i = 0; i < list.length; i++) {
+      await API.addKid(list[i].kid, list[i].flags, list[i].kidImage);
+    }
+
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -647,7 +642,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 10),
                   _input("العنوان", false, adressController),
                   SizedBox(height: 20),
-                  authority != "EMPLOYEE" ? _zoneShips(0) : null,
+                  authority != "WORKER" ? _zoneShips(0) : SizedBox(height: 10),
                 ],
               )),
           Container(
@@ -780,7 +775,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         if (_ready) {
                           setState(() {
                             page = 1;
-                            _ready = false;
                           });
                         }
                       },
@@ -812,6 +806,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Directionality(
             textDirection: TextDirection.rtl,
             child: TextFormField(
+              keyboardType: label == "رقم الهاتف" ? TextInputType.number : null,
+              inputFormatters: label == "رقم الهاتف"
+                  ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
+                  : null,
               onChanged: _checkFields(),
               validator: (value) {
                 if (value!.isEmpty) {

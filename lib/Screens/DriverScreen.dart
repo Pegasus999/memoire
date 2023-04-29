@@ -85,9 +85,24 @@ class _DriverScreenState extends State<DriverScreen> {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.grey,
         textColor: Colors.white,
         fontSize: 16.0);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _initialState();
+  }
+
+  _initialState() async {
+    String position = await API.getCommonPosition();
+
+    setState(() {
+      state = icons.indexWhere((item) => item["position"] == position);
+    });
   }
 
   @override
@@ -98,7 +113,7 @@ class _DriverScreenState extends State<DriverScreen> {
           child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +121,7 @@ class _DriverScreenState extends State<DriverScreen> {
                 Expanded(
                   child: Center(
                       child: Text(
-                    "5",
+                    "",
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   )),
                   flex: 1,
@@ -118,7 +133,7 @@ class _DriverScreenState extends State<DriverScreen> {
                       style:
                           TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                     )),
-                    flex: 5),
+                    flex: 7),
                 Expanded(
                     flex: 1,
                     child: Center(
@@ -127,7 +142,9 @@ class _DriverScreenState extends State<DriverScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: ((context) => DriversList())));
+                                  builder: ((context) => DriversList(
+                                        user: widget.user,
+                                      ))));
                         },
                         child: FaIcon(FontAwesomeIcons.list),
                       ),
@@ -156,8 +173,13 @@ class _DriverScreenState extends State<DriverScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: ((context) => LoginScreen())));
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => const LoginScreen()),
+                (Route<dynamic> route) =>
+                    false, // Remove all the routes in the stack
+              );
             },
             style: ButtonStyle(
                 iconColor: MaterialStatePropertyAll(Colors.red[400]),
