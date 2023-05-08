@@ -1,6 +1,6 @@
-import 'package:admins/Screens/SplashScreen.dart';
+import 'package:rayto/Screens/SplashScreen.dart';
 import 'package:flutter/material.dart';
-import 'package:admins/Screens/SplashScreen.dart';
+import 'package:rayto/Screens/SplashScreen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

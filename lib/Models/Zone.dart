@@ -1,4 +1,4 @@
-import 'package:admins/Models/Kid.dart';
+import 'package:rayto/Models/Kid.dart';
 
 class Zone {
   int? id;

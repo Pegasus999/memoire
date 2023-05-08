@@ -1,48 +1,50 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:admins/Models/Zone.dart';
-import 'package:admins/Models/Kid.dart';
-import 'package:admins/Screens/DriverScreen.dart';
-import 'package:admins/Screens/HomePage.dart';
-import 'package:admins/constant.dart';
+import 'package:rayto/Models/Zone.dart';
+import 'package:rayto/Models/Kid.dart';
+import 'package:rayto/Screens/DriverPage.dart';
+import 'package:rayto/Screens/EmployeeHomePage.dart';
+import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:admins/Models/User.dart';
-import 'package:admins/Models/Notification.dart';
+import 'package:rayto/Models/User.dart';
+import 'package:rayto/Models/Notification.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class API {
+  static String baseUrl = "http://10.0.2.2:5000/";
   static Future<void> login(
       String username, String password, BuildContext context) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('http://192.168.43.25:5000/api/auth/signin');
+      final url = Uri.parse('${baseUrl}api/auth/signin');
       final body = jsonEncode({'username': username, 'password': password});
 
       final response = await http.post(url, headers: headers, body: body);
-      // SharedPreferences prefs = await SharedPreferences.getInstance();
       if (response.statusCode == 200) {
         var user = User.fromJson(jsonDecode(response.body));
-        // user.auth == "ADMIN" || user.auth == "WORKER"
-        //     ? await prefs.setString("user", jsonEncode(user))
-        //     : null;
+        ;
         user.auth == "ADMIN" || user.auth == "WORKER"
             ? Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: ((context) => HomePage(
-                          user: user,
-                        ))))
+                  builder: ((context) => EmployeeHomePage(
+                        user: user,
+                      )),
+                ),
+              )
             : user.auth == "DRIVER"
                 ? Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: ((context) => DriverScreen(
-                              user: user,
-                            ))))
-                : throw Exception("Wrong credintials");
+                      builder: ((context) => DriverPage(
+                            user: user,
+                          )),
+                    ),
+                  )
+                : throw Exception("معلومات خاطئة");
       } else {
         print('Request failed with status: ${response.statusCode}.');
       }

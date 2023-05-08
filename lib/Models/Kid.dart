@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:admins/Models/Zone.dart';
-import 'package:admins/Models/Flags.dart';
+import 'package:rayto/Models/Zone.dart';
+import 'package:rayto/Models/Flags.dart';
 
 class Kid {
   String id = '';
