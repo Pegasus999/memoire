@@ -1,3 +1,4 @@
+import 'package:rayto/Screens/AddEmployeeAccount.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,7 +19,14 @@ class _EmployeesListState extends State<EmployeesList> {
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Constant.Yellow,
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => AddEmployee()),
+            ),
+          );
+        },
         child: FaIcon(FontAwesomeIcons.plus),
       ),
       body: SafeArea(
