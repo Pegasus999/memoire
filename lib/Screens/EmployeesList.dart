@@ -1,11 +1,13 @@
+import 'package:rayto/Models/User.dart';
 import 'package:rayto/Screens/AddEmployeeAccount.dart';
+import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class EmployeesList extends StatefulWidget {
-  const EmployeesList({super.key});
-
+  const EmployeesList({super.key, required this.user});
+  final User user;
   @override
   State<EmployeesList> createState() => _EmployeesListState();
 }
@@ -13,22 +15,59 @@ class EmployeesList extends StatefulWidget {
 class _EmployeesListState extends State<EmployeesList> {
   bool search = false;
   TextEditingController queryController = TextEditingController();
+  List<User>? users;
+  List<User>? untouchedUsers;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    final loadedUsers = await API.getUsers(updateUsersState);
+  }
+
+  void updateUsersState(List<User> loadedUsers) {
+    setState(() {
+      users = loadedUsers;
+      untouchedUsers = loadedUsers;
+    });
+  }
+
+  _filter(String value) {
+    if (value == '') {
+      setState(() {
+        users = untouchedUsers;
+      });
+    } else {
+      setState(() {
+        users = untouchedUsers!
+            .where((user) =>
+                user.name.contains(value) || user.lastname.contains(value))
+            .toList();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Constant.Yellow,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: ((context) => AddEmployee()),
-            ),
-          );
-        },
-        child: FaIcon(FontAwesomeIcons.plus),
-      ),
+      floatingActionButton: widget.user.auth == "ADMIN"
+          ? FloatingActionButton(
+              backgroundColor: Constant.Yellow,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((context) => AddEmployee(user: widget.user)),
+                  ),
+                );
+              },
+              child: FaIcon(FontAwesomeIcons.plus),
+            )
+          : null,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -110,15 +149,32 @@ class _EmployeesListState extends State<EmployeesList> {
                 child: Container(
               width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.all(16),
-              child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(
-                  color: Colors.transparent,
-                ),
-                itemBuilder: (context, index) {
-                  return _listTile();
-                },
-                itemCount: 4,
-              ),
+              child: FutureBuilder(
+                  future: API.getUsers((p0) => null),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      return ListView.separated(
+                        separatorBuilder: (context, index) => Divider(
+                          color: Colors.transparent,
+                        ),
+                        itemBuilder: (context, index) {
+                          return _listTile(index);
+                        },
+                        itemCount: users!.length,
+                      );
+                    } else if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else {
+                      return Center(
+                        child: Text(
+                          "لا يوجد عمال",
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    }
+                  }),
             ))
           ],
         ),
@@ -126,7 +182,7 @@ class _EmployeesListState extends State<EmployeesList> {
     );
   }
 
-  _listTile() {
+  _listTile(int index) {
     return Container(
       height: 100,
       decoration: BoxDecoration(
@@ -154,14 +210,14 @@ class _EmployeesListState extends State<EmployeesList> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "اسم الموظف",
+                  "${users![index].name} ${users![index].lastname}",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Constant.White),
                 ),
                 Text(
-                  "الوظيفة",
+                  "${users![index].job}",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -176,8 +232,7 @@ class _EmployeesListState extends State<EmployeesList> {
               child: CircleAvatar(
                   radius: 30,
                   backgroundColor: Constant.Creamy,
-                  backgroundImage:
-                      AssetImage("assets/images/MaleEmployee.png"))),
+                  backgroundImage: AssetImage("${users![index].picture}"))),
         ],
       ),
     );

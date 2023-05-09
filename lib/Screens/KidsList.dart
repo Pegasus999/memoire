@@ -1,11 +1,12 @@
 import 'package:rayto/Models/Kid.dart';
+import 'package:rayto/Models/User.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class KidsList extends StatefulWidget {
-  const KidsList({super.key});
-
+  const KidsList({super.key, required this.user});
+  final User user;
   @override
   State<KidsList> createState() => _KidsListState();
 }

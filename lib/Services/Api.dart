@@ -4,17 +4,15 @@ import 'package:rayto/Models/Zone.dart';
 import 'package:rayto/Models/Kid.dart';
 import 'package:rayto/Screens/DriverPage.dart';
 import 'package:rayto/Screens/EmployeeHomePage.dart';
-import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:rayto/Models/User.dart';
 import 'package:rayto/Models/Notification.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class API {
-  static String baseUrl = "http://10.0.2.2:5000/";
+  static String baseUrl = "http://192.168.1.112:5000/";
   static Future<void> login(
       String username, String password, BuildContext context) async {
     try {
@@ -70,9 +68,7 @@ class API {
   }
 
   static Future<List<User>?> getUsers(Function(List<User>) updateState) async {
-    var baseUrl = "http://192.168.43.25:5000/api/";
-    var type = "user/getAll";
-    var url = Uri.parse('${baseUrl}${type}');
+    var url = Uri.parse("${baseUrl}api/user/getEmployees");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
     if (data.runtimeType == String) {
@@ -85,7 +81,7 @@ class API {
 
   static Future<List<User>?> getParents(
       Function(List<User>) updateState) async {
-    var url = Uri.parse("http://192.168.43.25:5000/api/user/getParents");
+    var url = Uri.parse("${baseUrl}api/user/getParents");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
     if (data.runtimeType == String) {
@@ -98,9 +94,7 @@ class API {
 
   static Future<List<Notifications>?> getNotifications(
       Function(List<Notifications>) updateState) async {
-    var baseUrl = "http://192.168.43.25:5000/api/";
-    var type = "notif/getAll";
-    var url = Uri.parse('${baseUrl}${type}');
+    var url = Uri.parse("${baseUrl}api/notif/getAll");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
 
@@ -114,9 +108,7 @@ class API {
 
   static Future<List<Kid>?> getKids(Function(List<Kid>) updateState) async {
     try {
-      var baseUrl = "http://192.168.43.25:5000/api/";
-      var type = "kids/getAll";
-      var url = Uri.parse('${baseUrl}${type}');
+      var url = Uri.parse("${baseUrl}api/kids/getAll");
       var response = await http.get(url);
       var data = jsonDecode(response.body);
       if (data.runtimeType == String) {
@@ -132,7 +124,7 @@ class API {
 
   static Future<List<Zone>?> getZones(Function(List<Zone>) updateState) async {
     try {
-      var url = Uri.parse('http://192.168.43.25:5000/api/user/getZones');
+      var url = Uri.parse('${baseUrl}api/user/getZones');
       var response = await http.get(url);
       var data = jsonDecode(response.body);
       if (data.runtimeType == String) {
@@ -147,23 +139,87 @@ class API {
     }
   }
 
-  static Future<Map<String, dynamic>> addUser(User user, String username,
-      String password, String authority, String zone, XFile? file) async {
+  static Future<Map<String, dynamic>> addWorker(
+      User user, String username, String password, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
-      final url = Uri.parse('http://192.168.43.25:5000/api/user/addUser');
+      final url = Uri.parse('${baseUrl}api/user/addWorker');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
-        'id': user.id,
         'username': username,
         'password': password,
         'name': user.name,
         'lastname': user.lastname,
         'phone': user.phone,
-        'adress': user.adress,
-        'zone': zone,
-        'auth': authority,
+        'gender': user.gender,
+        'job': user.job ?? "",
+      });
+      if (file != null) {
+        request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      }
+      final response = await request.send();
+      final result = await http.Response.fromStream(response);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(result.body);
+      } else {
+        throw Exception('Request failed with status: ${response.statusCode}.');
+      }
+    } catch (error) {
+      // Handle any exceptions that occurred during the request
+      print(error);
+      throw Exception('$error');
+    }
+  }
+
+  static Future<Map<String, dynamic>> addDriver(User user, String username,
+      String password, String? zone, XFile? file) async {
+    try {
+      final headers = {'Content-Type': 'multipart/form-data'};
+      final url = Uri.parse('${baseUrl}api/user/addDriver');
+      final request = http.MultipartRequest('POST', url);
+      request.headers.addAll(headers);
+      request.fields.addAll({
+        'username': username,
+        'password': password,
+        'name': user.name,
+        'lastname': user.lastname,
+        'phone': user.phone,
+        'gender': user.gender,
+        'zone': zone ?? "",
+      });
+      if (file != null) {
+        request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      }
+      final response = await request.send();
+      final result = await http.Response.fromStream(response);
+      if (response.statusCode == 200) {
+        return jsonDecode(result.body);
+      } else {
+        throw Exception('Request failed with status: ${response.statusCode}.');
+      }
+    } catch (error) {
+      // Handle any exceptions that occurred during the request
+      throw Exception('$error');
+    }
+  }
+
+  static Future<Map<String, dynamic>> addParent(User user, String username,
+      String password, String? zone, XFile? file) async {
+    try {
+      final headers = {'Content-Type': 'multipart/form-data'};
+      final url = Uri.parse('${baseUrl}api/user/addParent');
+      final request = http.MultipartRequest('POST', url);
+      request.headers.addAll(headers);
+      request.fields.addAll({
+        'username': username,
+        'password': password,
+        'name': user.name,
+        'lastname': user.lastname,
+        'phone': user.phone,
+        'gender': user.gender,
+        'zone': zone ?? "",
       });
       if (file != null) {
         request.files.add(await http.MultipartFile.fromPath('file', file.path));
@@ -185,7 +241,7 @@ class API {
       Kid kid, List<Map<String, String>> flag, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
-      final url = Uri.parse('http://192.168.43.25:5000/api/kids/addKid');
+      final url = Uri.parse('${baseUrl}api/kids/addKid');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
@@ -214,7 +270,7 @@ class API {
   static Future<String> addNotification(String title, String details) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('http://192.168.43.25:5000/api/notif/post');
+      final url = Uri.parse('${baseUrl}api/notif/post');
       final body = jsonEncode({
         "title": title,
         "content": details,
@@ -238,7 +294,7 @@ class API {
       Function(List<Kid>) updateState, String zone) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      var url = Uri.parse('http://192.168.43.25:5000/api/kids/getZoneRelated');
+      var url = Uri.parse('${baseUrl}api/kids/getZoneRelated');
       var body = jsonEncode({"zone": zone});
       final response = await http.post(url, headers: headers, body: body);
 
@@ -259,7 +315,7 @@ class API {
       String newPosition, String zone) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('http://192.168.43.25:5000/api/kids/updateAll');
+      final url = Uri.parse('${baseUrl}api/kids/updateAll');
       final body = jsonEncode({"position": newPosition, "zone": zone});
       final response = await http.put(url, body: body, headers: headers);
       return "Position Updated";
@@ -276,7 +332,7 @@ class API {
               ? "ROAD"
               : "DAYCARE";
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('http://192.168.43.25:5000/api/kids/updateSingle');
+      final url = Uri.parse('${baseUrl}api/kids/updateSingle');
 
       final body = jsonEncode({"position": newPosition, "id": id});
       final response = await http.put(url, body: body, headers: headers);
@@ -284,19 +340,6 @@ class API {
       return "Position Updated";
     } catch (err) {
       return "Request failed";
-    }
-  }
-
-  static Future<String> getCommonPosition() async {
-    try {
-      var url = Uri.parse('http://192.168.43.25:5000/api/kids/getCommon');
-      var response = await http.get(url);
-      var data = jsonDecode(response.body);
-
-      return data;
-    } catch (err) {
-      print(err);
-      return "${err}";
     }
   }
 }

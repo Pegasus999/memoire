@@ -1,10 +1,13 @@
+import 'package:rayto/Models/User.dart';
+import 'package:rayto/Screens/AddEmployeeAccount.dart';
+import 'package:rayto/Screens/AddParentAccount.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ParentsList extends StatefulWidget {
-  const ParentsList({super.key});
-
+  const ParentsList({super.key, required this.user});
+  final User user;
   @override
   State<ParentsList> createState() => _ParentsListState();
 }
@@ -15,6 +18,21 @@ class _ParentsListState extends State<ParentsList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: widget.user.auth == "ADMIN"
+          ? FloatingActionButton(
+              backgroundColor: Constant.Yellow,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((context) => AddParentAccount(user: widget.user)),
+                  ),
+                );
+              },
+              child: FaIcon(FontAwesomeIcons.plus),
+            )
+          : null,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

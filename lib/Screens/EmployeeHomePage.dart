@@ -1,6 +1,7 @@
 import 'package:rayto/Models/User.dart';
 import 'package:rayto/Screens/AttendenceList.dart';
 import 'package:rayto/Screens/EmployeesList.dart';
+import 'package:rayto/Screens/LoginScreen.dart';
 import 'package:rayto/Screens/NotificationsList.dart';
 import 'package:rayto/Screens/SubsPage.dart';
 import 'package:rayto/constant.dart';
@@ -56,11 +57,16 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _card("المشتركين", "assets/images/Subs.jpg", context,
-                          SubsPage()),
+                      _card(
+                          "المشتركين",
+                          "assets/images/Subs.jpg",
+                          context,
+                          SubsPage(
+                            user: widget.user,
+                          )),
                       SizedBox(height: 20),
                       _card("الموظفين", "assets/images/Employees.jpg", context,
-                          EmployeesList())
+                          EmployeesList(user: widget.user))
                     ],
                   ),
                   SizedBox(height: 50),
@@ -93,23 +99,35 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                           ),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          FaIcon(
-                            FontAwesomeIcons.rightFromBracket,
-                            color: Constant.Red,
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            "تسجيل الخروج",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Constant.Red),
-                          ),
-                        ],
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    const LoginScreen()),
+                            (Route<dynamic> route) =>
+                                false, // Remove all the routes in the stack
+                          );
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            FaIcon(
+                              FontAwesomeIcons.rightFromBracket,
+                              color: Constant.Red,
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              "تسجيل الخروج",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Constant.Red),
+                            ),
+                          ],
+                        ),
                       ))),
             )
           ],

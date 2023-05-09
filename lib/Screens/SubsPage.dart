@@ -1,3 +1,4 @@
+import 'package:rayto/Models/User.dart';
 import 'package:rayto/Screens/KidsList.dart';
 import 'package:rayto/Screens/ParentsList.dart';
 import 'package:rayto/constant.dart';
@@ -5,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SubsPage extends StatefulWidget {
-  const SubsPage({super.key});
-
+  const SubsPage({super.key, required this.user});
+  final User user;
   @override
   State<SubsPage> createState() => _SubsPageState();
 }
@@ -55,7 +56,9 @@ class _SubsPageState extends State<SubsPage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ParentsList()));
+                              builder: (context) => ParentsList(
+                                    user: widget.user,
+                                  )));
                     },
                     child: Container(
                       height: 200,
@@ -87,8 +90,12 @@ class _SubsPageState extends State<SubsPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => KidsList()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => KidsList(
+                                    user: widget.user,
+                                  )));
                     },
                     child: Container(
                       height: 200,
