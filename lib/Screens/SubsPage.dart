@@ -58,6 +58,7 @@ class _SubsPageState extends State<SubsPage> {
                           MaterialPageRoute(
                               builder: (context) => ParentsList(
                                     user: widget.user,
+                                    adding: false,
                                   )));
                     },
                     child: Container(

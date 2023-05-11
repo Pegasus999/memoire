@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _showPopup = false;
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool loading = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -65,13 +66,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 50,
                           width: 250,
                           child: Center(
-                              child: Text(
-                            "دخول",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: Constant.White,
-                                fontSize: 20),
-                          )),
+                              child: loading
+                                  ? CircularProgressIndicator(
+                                      color: Constant.White,
+                                    )
+                                  : Text(
+                                      "دخول",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          color: Constant.White,
+                                          fontSize: 20),
+                                    )),
                         ))
                   ]),
             )),
@@ -84,8 +89,14 @@ class _LoginScreenState extends State<LoginScreen> {
   _login() async {
     if (usernameController.text.isNotEmpty &&
         passwordController.text.isNotEmpty) {
+      setState(() {
+        loading = true;
+      });
       await API.login(
           usernameController.text, passwordController.text, context);
+      setState(() {
+        loading = false;
+      });
     } else {
       Fluttertoast.showToast(msg: "الرجاء ادخال معلومات");
     }

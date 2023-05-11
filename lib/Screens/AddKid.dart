@@ -1,85 +1,77 @@
-import 'dart:async';
+import "dart:async";
 import 'dart:io';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:rayto/Models/User.dart';
-import 'package:rayto/Models/Zone.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:rayto/Screens/EmployeesList.dart';
-import 'package:rayto/Services/Api.dart';
-import 'package:rayto/constant.dart';
-import 'package:drop_down_list/drop_down_list.dart';
-import 'package:drop_down_list/model/selected_list_item.dart';
+import "package:flutter/material.dart";
+import "package:fluttertoast/fluttertoast.dart";
+import "package:font_awesome_flutter/font_awesome_flutter.dart";
+import "package:image_picker/image_picker.dart";
+import "package:rayto/Models/Kid.dart";
+import 'package:intl/intl.dart' as intl;
+import "package:rayto/Models/User.dart";
+import "package:rayto/Screens/KidsList.dart";
+import "package:rayto/Services/Api.dart";
+import "package:rayto/constant.dart";
 
-class AddEmployee extends StatefulWidget {
-  const AddEmployee({super.key, required this.user});
+class AddKid extends StatefulWidget {
+  const AddKid({super.key, required this.user, required this.parent});
   final User user;
+  final User parent;
   @override
-  State<AddEmployee> createState() => _AddEmployeeState();
+  State<AddKid> createState() => _AddKidState();
 }
 
-class _AddEmployeeState extends State<AddEmployee> {
+class _AddKidState extends State<AddKid> {
   int page = 0;
   String gender = "";
-  String auth = "";
-  String? zone;
-  final ImagePicker picker = ImagePicker();
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
-  TextEditingController lastNameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController jobController = TextEditingController();
-  List<SelectedListItem> formats = [];
-  XFile? picture;
+  TextEditingController schoolController = TextEditingController();
+  final ImagePicker picker = ImagePicker();
   bool _ready = false;
+  DateTime? birthday;
+  XFile? picture;
+
+  _pickBirthday() async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        locale: Locale("en"),
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2030));
+    if (picked != null && picked != birthday)
+      setState(() {
+        birthday = picked;
+      });
+  }
 
   _createUser() async {
-    final user = User.fromJson({
+    final kid = Kid.fromJson({
       "id": "",
       "gender": gender,
-      "job": jobController.text.isNotEmpty ? jobController.text : "",
+      "userId": widget.parent.id,
+      "school": schoolController.text,
       'name': nameController.text,
-      'lastname': lastNameController.text,
-      'phone': phoneController.text,
-      'auth': auth,
+      "lastname": widget.parent.lastname,
+      "User": {
+        "phone": widget.parent.phone,
+        "zone": {"name": widget.parent.zone!.name}
+      },
+      "position": "HOME",
+      "birthday": birthday,
       'picture': "",
     });
-
-    final res = auth == "WORKER"
-        ? await API.addWorker(
-            user, usernameController.text, passwordController.text, picture)
-        : await API.addDriver(user, usernameController.text,
-            passwordController.text, zone, picture);
-
-    Fluttertoast.showToast(
-      msg: "${res['message']}",
-    );
+    final res = await API.addKid(kid, picture);
+    print(kid);
+    // Fluttertoast.showToast(
+    //   msg: "${res['message']}",
+    // );
+    // ignore: use_build_context_synchronously
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: ((context) => EmployeesList(
+        builder: ((context) => KidsList(
               user: widget.user,
             )),
       ),
     );
-  }
-
-  updateZonesState(List<Zone> loadedZones) {
-    for (int i = 0; i < loadedZones.length; i++) {
-      formats.add(SelectedListItem(name: loadedZones[i].name));
-    }
-  }
-
-  void loadData() async {
-    final loadedZone = await API.getZones(updateZonesState);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadData();
   }
 
   @override
@@ -146,11 +138,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                         ),
                       ]),
                 ),
-                page == 0
-                    ? _genderScreen()
-                    : page == 1
-                        ? _jobScreen()
-                        : _informationScreen(),
+                page == 0 ? _genderScreen() : _informationScreen(),
               ],
             ),
           ),
@@ -193,7 +181,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                   children: [
                     Container(
                         width: 115,
-                        child: Image.asset("assets/images/MaleEmployee.png")),
+                        child: Image.asset("assets/images/Boy.png")),
                     SizedBox(height: 10),
                     Text(
                       "ذكر",
@@ -230,97 +218,10 @@ class _AddEmployeeState extends State<AddEmployee> {
                   children: [
                     Container(
                         width: 110,
-                        child: Image.asset("assets/images/FemaleEmployee.png")),
+                        child: Image.asset("assets/images/Girl.png")),
                     SizedBox(height: 10),
                     Text(
                       "انثى",
-                      style: TextStyle(color: Constant.Red, fontSize: 20),
-                    )
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  _jobScreen() {
-    return Expanded(
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  auth = "WORKER";
-                  page++;
-                });
-              },
-              child: Container(
-                height: 200,
-                width: 150,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 3,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                        width: 115,
-                        child: Image.asset("assets/images/MaleEmployee.png")),
-                    SizedBox(height: 10),
-                    Text(
-                      "موظف",
-                      style: TextStyle(color: Constant.Red, fontSize: 20),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  auth = "DRIVER";
-                  page++;
-                });
-              },
-              child: Container(
-                height: 200,
-                width: 150,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 3,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                        width: 115,
-                        child: Image.asset("assets/images/Driver.png")),
-                    SizedBox(height: 10),
-                    Text(
-                      "سائق",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
                     )
                   ],
@@ -350,9 +251,9 @@ class _AddEmployeeState extends State<AddEmployee> {
                     ? CircleAvatar(
                         radius: 50,
                         backgroundColor: Constant.Creamy,
-                        backgroundImage: auth == "WORKER"
-                            ? const AssetImage("assets/images/MaleEmployee.png")
-                            : const AssetImage("assets/images/Driver.png"),
+                        backgroundImage: gender == "MALE"
+                            ? const AssetImage("assets/images/Boy.png")
+                            : const AssetImage("assets/images/Girl.png"),
                       )
                     : CircleAvatar(
                         radius: 50,
@@ -364,26 +265,16 @@ class _AddEmployeeState extends State<AddEmployee> {
             SizedBox(height: 50),
             _input("الاسم", nameController, false),
             SizedBox(height: 20),
-            _input("اللقب", lastNameController, false),
+            _birthdayPicker(),
             SizedBox(height: 20),
-            _input("اسم المستخدم", usernameController, false),
+            _input("المؤسسة", schoolController, false),
             SizedBox(height: 20),
-            _input("كلمة السر", passwordController, true),
-            SizedBox(height: 20),
-            _input("رقم الهاتف", phoneController, false),
-            SizedBox(height: 20),
-            auth == "WORKER"
-                ? _input('الوظيفة', jobController, false)
-                : _dropDownMenu(),
-            SizedBox(height: 50),
             Opacity(
               opacity: _ready ? 1 : 0.7,
               child: GestureDetector(
                   onTap: () {
                     if (_ready) {
                       _createUser();
-                    } else if (phoneController.text.length != 10) {
-                      Fluttertoast.showToast(msg: "الرجاء تأكد من رقم الهاتف");
                     } else {
                       Fluttertoast.showToast(msg: "الرجاء ادخال معلومات");
                     }
@@ -408,83 +299,6 @@ class _AddEmployeeState extends State<AddEmployee> {
         ))
       ],
     ));
-  }
-
-  _dropDownMenu() {
-    return Container(
-      width: 350,
-      height: 50,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        border: Border.all(
-          color: Colors.white,
-          width: 1,
-        ),
-      ),
-      child: GestureDetector(
-        onTap: () {
-          _onDropDownClick();
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Icon(Icons.arrow_drop_down),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    zone ?? "المنطقة",
-                    style: TextStyle(color: Constant.Creamy),
-                    textDirection: TextDirection.rtl,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void valueChange(String? message) {
-    setState(() {
-      zone = message;
-    });
-  }
-
-  _onDropDownClick() {
-    DropDownState(
-      DropDown(
-        bottomSheetTitle: Align(
-          alignment: Alignment.centerRight,
-          child: const Text(
-            "المناطق",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0,
-            ),
-          ),
-        ),
-        data: formats,
-        selectedItems: (List<dynamic> selectedList) {
-          String? selected;
-          for (var item in selectedList) {
-            if (item is SelectedListItem) {
-              selected = item.name;
-            }
-          }
-
-          valueChange(selected);
-        },
-        enableMultipleSelection: false,
-      ),
-    ).showModal(context);
   }
 
   Future getAccImage(ImageSource media) async {
@@ -540,30 +354,6 @@ class _AddEmployeeState extends State<AddEmployee> {
         });
   }
 
-  _checkFields() {
-    if (auth == "WORKER") {
-      setState(() {
-        _ready = usernameController.text.isNotEmpty &&
-            passwordController.text.isNotEmpty &&
-            nameController.text.isNotEmpty &&
-            lastNameController.text.isNotEmpty &&
-            phoneController.text.isNotEmpty &&
-            phoneController.text.length == 10 &&
-            jobController.text.isNotEmpty;
-      });
-    } else {
-      setState(() {
-        _ready = usernameController.text.isNotEmpty &&
-            passwordController.text.isNotEmpty &&
-            nameController.text.isNotEmpty &&
-            lastNameController.text.isNotEmpty &&
-            phoneController.text.isNotEmpty &&
-            phoneController.text.length == 10 &&
-            zone != null;
-      });
-    }
-  }
-
   _input(String hint, TextEditingController controller, bool pass) {
     return Container(
       width: 350,
@@ -580,7 +370,9 @@ class _AddEmployeeState extends State<AddEmployee> {
         textDirection: TextDirection.rtl,
         child: TextFormField(
           controller: controller,
-          onChanged: _checkFields(),
+          onChanged: (value) {
+            _checkFields();
+          },
           style: TextStyle(color: Constant.Creamy),
           obscureText: pass,
           decoration: InputDecoration(
@@ -592,5 +384,59 @@ class _AddEmployeeState extends State<AddEmployee> {
         ),
       ),
     );
+  }
+
+  _birthdayPicker() {
+    return Container(
+      width: 350,
+      height: 50,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.white,
+          width: 1,
+        ),
+      ),
+      child: GestureDetector(
+        onTap: () {
+          _pickBirthday();
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(Icons.arrow_drop_down),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    birthday != null
+                        ? intl.DateFormat('dd/MM/yyyy').format(birthday!)
+                        : "تاريخ الميلاد",
+                    style: TextStyle(color: Constant.Creamy),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _checkFields() {
+    final bool check = nameController.text.isNotEmpty &&
+        birthday != null &&
+        schoolController.text.isNotEmpty;
+
+    setState(() {
+      _ready = check;
+    });
   }
 }

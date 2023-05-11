@@ -12,13 +12,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class API {
-  static String baseUrl = "http://192.168.1.112:5000/";
+  static String baseUrl = "http://192.168.43.25:5000/";
   static Future<void> login(
       String username, String password, BuildContext context) async {
     try {
       final headers = {'Content-Type': 'application/json'};
       final url = Uri.parse('${baseUrl}api/auth/signin');
-      final body = jsonEncode({'username': username, 'password': password});
+      final body = jsonEncode(
+          {'username': username.trim(), 'password': password.trim()});
 
       final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
@@ -147,8 +148,8 @@ class API {
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
-        'username': username,
-        'password': password,
+        'username': username.trim(),
+        'password': password.trim(),
         'name': user.name,
         'lastname': user.lastname,
         'phone': user.phone,
@@ -181,8 +182,8 @@ class API {
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
-        'username': username,
-        'password': password,
+        'username': username.trim(),
+        'password': password.trim(),
         'name': user.name,
         'lastname': user.lastname,
         'phone': user.phone,
@@ -205,8 +206,8 @@ class API {
     }
   }
 
-  static Future<Map<String, dynamic>> addParent(User user, String username,
-      String password, String? zone, XFile? file) async {
+  static Future<Map<String, dynamic>> addParent(
+      User user, String username, String password, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
       final url = Uri.parse('${baseUrl}api/user/addParent');
@@ -219,7 +220,8 @@ class API {
         'lastname': user.lastname,
         'phone': user.phone,
         'gender': user.gender,
-        'zone': zone ?? "",
+        'adress': user.adress ?? "",
+        'zone': user.zone!.name,
       });
       if (file != null) {
         request.files.add(await http.MultipartFile.fromPath('file', file.path));
@@ -237,8 +239,7 @@ class API {
     }
   }
 
-  static Future<String> addKid(
-      Kid kid, List<Map<String, String>> flag, XFile? file) async {
+  static Future<String> addKid(Kid kid, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
       final url = Uri.parse('${baseUrl}api/kids/addKid');
@@ -249,9 +250,8 @@ class API {
         "name": kid.name,
         "lastname": kid.lastname,
         "date": kid.birthday.toString(),
-        "grade": kid.grade,
+        "school": kid.school,
         "zone": kid.zone.name,
-        "flags": jsonEncode(flag)
       });
       if (file != null) {
         request.files.add(await http.MultipartFile.fromPath("file", file.path));

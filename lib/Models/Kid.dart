@@ -10,9 +10,8 @@ class Kid {
   String parentId = '';
   DateTime birthday;
   String picture = '';
-  List<Flag>? flag = [];
   Zone zone;
-  String grade;
+  String school;
   String? phone;
   String position;
 
@@ -28,11 +27,8 @@ class Kid {
             : json["position"] == "ROAD"
                 ? "في الطريق"
                 : "في الروضة",
-        grade = json['grade'],
-        birthday = DateTime.parse(json['birthday']),
-        flag = json['flags'] != null && json['flags'].length != 0
-            ? Flag.parseFlags(json['flags'])
-            : null,
+        school = json['school'],
+        birthday = json['birthday'],
         zone = Zone.fromJson({"name": json['User']['zone']['name']});
 
   static List<Kid> parseKids(List<dynamic> kids) {
