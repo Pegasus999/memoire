@@ -10,6 +10,7 @@ import 'package:rayto/Models/User.dart';
 import 'package:rayto/Models/Notification.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:rayto/Screens/ParentHomePage.dart';
 
 class API {
   static String baseUrl = "http://192.168.43.25:5000/api/";
@@ -42,7 +43,16 @@ class API {
                           )),
                     ),
                   )
-                : throw Exception("معلومات خاطئة");
+                : user.auth == "PARENT"
+                    ? Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) => ParentHomePage(
+                                parent: user,
+                              )),
+                        ),
+                      )
+                    : Exception("معلومات خاطئة");
       } else {
         throw Exception("معلومات خاطئة");
       }
@@ -117,6 +127,26 @@ class API {
       List<Kid> loadedKids = Kid.parseKids(data);
       updateState(loadedKids);
       return Kid.parseKids(data);
+    } catch (err) {
+      throw Exception("$err");
+    }
+  }
+
+  static Future<List<Kid>?> getMine(
+      Function(List<Kid>) updateState, String id) async {
+    try {
+      final headers = {'Content-Type': 'application/json'};
+      final body = jsonEncode({'id': id});
+
+      final url = Uri.parse("${baseUrl}kids/getMine");
+      var response = await http.post(url, headers: headers, body: body);
+      var data = jsonDecode(response.body);
+      if (data.runtimeType == String) {
+        return null;
+      }
+      List<Kid> loadedKids = Kid.parseKids(data);
+      updateState(loadedKids);
+      return loadedKids;
     } catch (err) {
       throw Exception("$err");
     }
@@ -316,7 +346,9 @@ class API {
           ? "HOME"
           : position == "في الطريق"
               ? "ROAD"
-              : "DAYCARE";
+              : position == "في الموؤسسة"
+                  ? "SCHOOL"
+                  : "DAYCARE";
       final headers = {'Content-Type': 'application/json'};
       final url = Uri.parse('${baseUrl}attendence/updatePosition');
 
@@ -326,6 +358,19 @@ class API {
       return "Position Updated";
     } catch (err) {
       return "Request failed";
+    }
+  }
+
+  static Future<String> resub(String id) async {
+    try {
+      final headers = {'Content-Type': 'application/json'};
+      var url = Uri.parse('${baseUrl}kids/resub');
+      var body = jsonEncode({"id": id});
+      await http.put(url, headers: headers, body: body);
+
+      return "resubbed";
+    } catch (err) {
+      throw Exception(err);
     }
   }
 
@@ -340,7 +385,7 @@ class API {
       }
       List<Kid> loadedKids = Kid.parseKids(data);
       updateState(loadedKids);
-      return Kid.parseKids(data);
+      return loadedKids;
     } catch (err) {
       throw Exception("$err");
     }

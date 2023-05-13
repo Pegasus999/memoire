@@ -241,7 +241,7 @@ class _KidsListState extends State<KidsList> {
                         FaIcon(FontAwesomeIcons.child,
                             color: _handleIconColor(index, "في الروضة")),
                         FaIcon(FontAwesomeIcons.school,
-                            color: _handleIconColor(index, "في المؤسسة")),
+                            color: _handleIconColor(index, "في الموؤسسة")),
                       ],
                     ),
                   ),
@@ -261,7 +261,6 @@ class _KidsListState extends State<KidsList> {
   }
 
   Color _handleIconColor(int index, String icon) {
-    print(kids![index].position);
     if (kids![index].position == icon) {
       return Constant.Yellow;
     } else {

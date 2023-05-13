@@ -1,9 +1,10 @@
-
 import "package:flutter/material.dart";
+import "package:fluttertoast/fluttertoast.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:rayto/Models/User.dart";
 import "package:rayto/Screens/AddKid.dart";
 import "package:rayto/Screens/ParentsList.dart";
+import "package:rayto/Services/Api.dart";
 import "package:rayto/constant.dart";
 
 class ParentPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class ParentPage extends StatefulWidget {
 }
 
 class _ParentPageState extends State<ParentPage> {
+  bool sub = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +60,8 @@ class _ParentPageState extends State<ParentPage> {
                 const SizedBox(height: 30),
                 Text(
                   "${widget.parent.name} ${widget.parent.lastname}",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 Padding(
@@ -67,39 +70,46 @@ class _ParentPageState extends State<ParentPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        height: 150,
-                        width: 150,
-                        decoration: BoxDecoration(
-                            color: Constant.Yellow,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 3,
-                                blurRadius: 5,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(16))),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              FaIcon(
-                                FontAwesomeIcons.cashRegister,
-                                size: 60,
-                                color: Constant.White,
-                              ),
-                              const SizedBox(height: 30),
-                              Text(
-                                "تجديد الاشتراك",
-                                style: TextStyle(
-                                    color: Constant.White,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold),
-                              )
-                            ]),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            sub = true;
+                          });
+                        },
+                        child: Container(
+                          height: 150,
+                          width: 150,
+                          decoration: BoxDecoration(
+                              color: Constant.Yellow,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 3,
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(16))),
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                FaIcon(
+                                  FontAwesomeIcons.cashRegister,
+                                  size: 60,
+                                  color: Constant.White,
+                                ),
+                                const SizedBox(height: 30),
+                                Text(
+                                  "تجديد الاشتراك",
+                                  style: TextStyle(
+                                      color: Constant.White,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ]),
+                        ),
                       ),
                       GestureDetector(
                         onTap: () {
@@ -186,7 +196,22 @@ class _ParentPageState extends State<ParentPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(width: 40),
+          sub
+              ? GestureDetector(
+                  onTap: () {
+                    _resub(index);
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left: 10),
+                    width: 40,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(50))),
+                    child: Center(child: FaIcon(FontAwesomeIcons.check)),
+                  ),
+                )
+              : Container(),
           Container(
             child: Center(
                 child: Column(
@@ -216,10 +241,18 @@ class _ParentPageState extends State<ParentPage> {
                   child: CircleAvatar(
                       radius: 40,
                       backgroundColor: Constant.Creamy,
-                      backgroundImage: NetworkImage(
-                          widget.parent.kids![index].picture))),
+                      backgroundImage:
+                          NetworkImage(widget.parent.kids![index].picture))),
         ],
       ),
     );
+  }
+
+  _resub(int index) async {
+    final result = await API.resub(widget.parent.kids![index].id);
+    Fluttertoast.showToast(msg: result);
+    setState(() {
+      sub = false;
+    });
   }
 }

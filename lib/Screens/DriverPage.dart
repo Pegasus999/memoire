@@ -208,7 +208,7 @@ class _DriverPageState extends State<DriverPage> {
                             backgroundColor: Constant.Yellow,
                             child: FaIcon(
                               FontAwesomeIcons.schoolFlag,
-                              color: _handleIconColor(index, "في المؤسسة"),
+                              color: _handleIconColor(index, "في الموؤسسة"),
                             ),
                           ),
                         ),
@@ -295,7 +295,6 @@ class _DriverPageState extends State<DriverPage> {
   }
 
   Color _handleIconColor(int index, String icon) {
-    print(kids![index].position);
     if (kids![index].position == icon) {
       return Constant.Red;
     } else {
@@ -309,7 +308,7 @@ class _DriverPageState extends State<DriverPage> {
         : icon == "ROAD"
             ? "في الطريق"
             : icon == "SCHOOL"
-                ? "في المؤسسة"
+                ? "في الموؤسسة"
                 : "في الروضة";
     final List<Kid> newList = [...?kids];
     newList[index].position = newPosition;
@@ -338,37 +337,30 @@ class _DriverPageState extends State<DriverPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Text(
-                          "هل هذه توصيلة",
+                          "هل انتهى الدوام",
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 10),
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: GestureDetector(
-                                onTap: () {},
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(16)),
-                                        color: Constant.Creamy),
-                                    child: const Center(child: Text("الاولى"))),
-                              )),
-                              const SizedBox(width: 5),
-                              Expanded(
-                                  child: GestureDetector(
-                                onTap: () {},
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(16)),
-                                        color: Constant.Creamy),
-                                    child:
-                                        const Center(child: Text("الثانية"))),
-                              ))
-                            ],
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () {
+                            _restPresence();
+                          },
+                          child: Container(
+                            width: 100,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16)),
+                                color: Constant.Yellow),
+                            child: Center(
+                                child: Text(
+                              "تأكيد",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  color: Constant.White,
+                                  fontSize: 20),
+                            )),
                           ),
                         )
                       ]),

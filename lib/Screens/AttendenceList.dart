@@ -20,18 +20,18 @@ class _AttendenceListState extends State<AttendenceList> {
   @override
   void initState() {
     super.initState();
-    loadData(updateKidsState);
+    loadData();
   }
 
-  Future<void> loadData(Function(List<Kid>) updateState) async {
-    final loadedKids = await API.getAttendence(updateState);
-    if (loadedKids == []) {}
+  Future<void> loadData() async {
+    await API.getAttendence(updateKidsState);
   }
 
   void updateKidsState(List<Kid> loadedKids) {
     setState(() {
       kids = loadedKids;
     });
+    print(kids);
   }
 
   @override
@@ -78,12 +78,13 @@ class _AttendenceListState extends State<AttendenceList> {
                     width: MediaQuery.of(context).size.width,
                     padding: const EdgeInsets.all(16),
                     child: FutureBuilder(
-                        future: loadData((p0) => null),
+                        future: API.getAttendence((p0) => null),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
-                          if (snapshot.hasData && snapshot.data != null) {
+                          if (snapshot.hasData && kids!.isNotEmpty) {
                             return ListView.separated(
-                              separatorBuilder: (context, index) => const Divider(
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
                                 color: Colors.transparent,
                               ),
                               itemBuilder: (context, index) {
@@ -93,7 +94,8 @@ class _AttendenceListState extends State<AttendenceList> {
                             );
                           } else if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           } else {
                             return const Center(
                               child: Text(
@@ -159,8 +161,7 @@ class _AttendenceListState extends State<AttendenceList> {
                   child: CircleAvatar(
                       radius: 35,
                       backgroundColor: Constant.Creamy,
-                      backgroundImage:
-                          NetworkImage(kids![index].picture))),
+                      backgroundImage: NetworkImage(kids![index].picture))),
         ],
       ),
     );

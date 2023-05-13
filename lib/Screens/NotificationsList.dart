@@ -1,6 +1,7 @@
 import 'package:rayto/Models/Notification.dart';
 import 'package:rayto/Models/User.dart';
 import 'package:rayto/Screens/EmployeeHomePage.dart';
+import 'package:rayto/Screens/ParentHomePage.dart';
 import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
@@ -41,13 +42,16 @@ class _NotificationsListState extends State<NotificationsList> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Constant.Yellow,
-        onPressed: () {
-          _showDialog();
-        },
-        child: const FaIcon(FontAwesomeIcons.plus),
-      ),
+      floatingActionButton:
+          widget.user.auth == "ADMIN" || widget.user.auth == "WORKER"
+              ? FloatingActionButton(
+                  backgroundColor: Constant.Yellow,
+                  onPressed: () {
+                    _showDialog();
+                  },
+                  child: const FaIcon(FontAwesomeIcons.plus),
+                )
+              : null,
       backgroundColor: Constant.White,
       body: SafeArea(
         child: Column(
@@ -66,12 +70,20 @@ class _NotificationsListState extends State<NotificationsList> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: ((context) =>
-                                EmployeeHomePage(user: widget.user)),
-                          ));
+                      widget.user.auth == "ADMIN" ||
+                              widget.user.auth == "WORKER"
+                          ? Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: ((context) =>
+                                    EmployeeHomePage(user: widget.user)),
+                              ))
+                          : Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: ((context) =>
+                                    ParentHomePage(parent: widget.user)),
+                              ));
                     },
                     child: const FaIcon(FontAwesomeIcons.arrowLeft),
                   ),

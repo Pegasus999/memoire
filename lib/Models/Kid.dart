@@ -35,7 +35,7 @@ class Kid {
             : json["position"] == "ROAD"
                 ? "في الطريق"
                 : json["position"] == "SCHOOL"
-                    ? "في المؤسسة"
+                    ? "في الموؤسسة"
                     : "في الروضة",
         school = json['school'],
         zone = Zone.fromJson({"name": json['User']['zone']['name']});
