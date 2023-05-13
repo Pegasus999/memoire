@@ -82,6 +82,7 @@ flutter:
     - assets/images/Boy.png
     - assets/images/Girl.png
     - assets/images/Driver.png
+    - assets/images/ex.png
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

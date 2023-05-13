@@ -1,34 +1,43 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:rayto/Models/Zone.dart';
-import 'package:rayto/Models/Flags.dart';
 
 class Kid {
   String id = '';
   String name = '';
   String lastname = '';
   String parentId = '';
-  DateTime birthday;
+  String gender;
+  DateTime subscription;
   String picture = '';
   Zone zone;
+  bool morningPresent;
+  bool eveningPresent;
   String school;
+  String adress;
   String? phone;
   String position;
 
   Kid.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         name = json['name'],
+        morningPresent = json['morningPresent'] ?? false,
+        eveningPresent = json['eveningPresent'] ?? false,
+        adress = json['User']['adress'],
+        gender = json['gender'],
+        subscription = json['subscription'] != null
+            ? DateTime.parse(json['subscription'])
+            : DateTime.now(),
         lastname = json['lastname'],
-        phone = json["User"]["phone"] != null ? json["User"]["phone"] : null,
+        phone = json["User"]["phone"],
         parentId = json['userId'],
         picture = json['picture'],
         position = json['position'] == "HOME"
             ? 'في المنزل'
             : json["position"] == "ROAD"
                 ? "في الطريق"
-                : "في الروضة",
+                : json["position"] == "SCHOOL"
+                    ? "في المؤسسة"
+                    : "في الروضة",
         school = json['school'],
-        birthday = json['birthday'],
         zone = Zone.fromJson({"name": json['User']['zone']['name']});
 
   static List<Kid> parseKids(List<dynamic> kids) {

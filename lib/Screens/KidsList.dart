@@ -1,5 +1,7 @@
 import 'package:rayto/Models/Kid.dart';
 import 'package:rayto/Models/User.dart';
+import 'package:rayto/Screens/ParentsList.dart';
+import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,11 +16,61 @@ class KidsList extends StatefulWidget {
 class _KidsListState extends State<KidsList> {
   bool search = false;
   TextEditingController queryController = TextEditingController();
-  List<Kid> kids = [];
+  List<Kid>? kids = [];
+  List<Kid>? untouchedKids;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    await API.getKids(updateKidsState);
+  }
+
+  void updateKidsState(List<Kid> loadedKids) {
+    setState(() {
+      kids = loadedKids;
+      untouchedKids = loadedKids;
+    });
+  }
+
+  _filter(String value) {
+    if (value == '') {
+      setState(() {
+        kids = untouchedKids;
+      });
+    } else {
+      setState(() {
+        kids = untouchedKids!
+            .where((user) =>
+                user.name.contains(value) || user.lastname.contains(value))
+            .toList();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: widget.user.auth == "ADMIN"
+          ? FloatingActionButton(
+              backgroundColor: Constant.Yellow,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: ((context) =>
+                        ParentsList(adding: true, user: widget.user)),
+                  ),
+                );
+              },
+              child: const FaIcon(FontAwesomeIcons.plus),
+            )
+          : null,
+      backgroundColor: Constant.White,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -26,7 +78,7 @@ class _KidsListState extends State<KidsList> {
           children: [
             Container(
               height: 70,
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 18,
               ),
               width: double.infinity,
@@ -38,7 +90,7 @@ class _KidsListState extends State<KidsList> {
                     onTap: () {
                       Navigator.of(context).pop();
                     },
-                    child: FaIcon(FontAwesomeIcons.arrowLeft),
+                    child: const FaIcon(FontAwesomeIcons.arrowLeft),
                   ),
                   Visibility(
                     visible: !search,
@@ -47,8 +99,8 @@ class _KidsListState extends State<KidsList> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(),
-                          Text(
+                          const SizedBox(),
+                          const Text(
                             "الاطفال",
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
@@ -59,7 +111,8 @@ class _KidsListState extends State<KidsList> {
                                   search = !search;
                                 });
                               },
-                              child: FaIcon(FontAwesomeIcons.magnifyingGlass)),
+                              child: const FaIcon(
+                                  FontAwesomeIcons.magnifyingGlass)),
                         ],
                       ),
                     ),
@@ -80,6 +133,9 @@ class _KidsListState extends State<KidsList> {
                             textDirection: TextDirection.rtl,
                             child: TextFormField(
                               textAlignVertical: TextAlignVertical.center,
+                              onChanged: (value) {
+                                _filter(value);
+                              },
                               controller: queryController,
                               style: TextStyle(color: Constant.Creamy),
                               decoration: InputDecoration(
@@ -98,18 +154,37 @@ class _KidsListState extends State<KidsList> {
             ),
             Expanded(
                 child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(16),
-              child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(
-                  color: Colors.transparent,
-                ),
-                itemBuilder: (context, index) {
-                  return _listTile(index);
-                },
-                itemCount: 4,
-              ),
-            ))
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.all(16),
+                    child: FutureBuilder(
+                        future: API.getKids((p0) => null),
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasData && snapshot.data != null) {
+                            return ListView.separated(
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
+                                color: Colors.transparent,
+                              ),
+                              itemBuilder: (context, index) {
+                                return _listTile(index);
+                              },
+                              itemCount: kids!.length,
+                            );
+                          } else if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            return const Center(
+                              child: Text(
+                                "لا يوجد اطفال",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            );
+                          }
+                        })))
           ],
         ),
       ),
@@ -120,7 +195,7 @@ class _KidsListState extends State<KidsList> {
     return Container(
       height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         color: Constant.Green,
       ),
       child: Row(
@@ -128,7 +203,7 @@ class _KidsListState extends State<KidsList> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: CircleAvatar(
                 radius: 20,
                 backgroundColor: Constant.Yellow,
@@ -144,14 +219,14 @@ class _KidsListState extends State<KidsList> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "اسم الطفل",
+                  "${kids![index].name} ${kids![index].lastname}",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Constant.White),
                 ),
                 Expanded(
-                  child: Container(
+                  child: SizedBox(
                     width: 150,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -159,14 +234,14 @@ class _KidsListState extends State<KidsList> {
                       children: [
                         FaIcon(
                           FontAwesomeIcons.house,
-                          color: _handleIconColor(index, "HOME"),
+                          color: _handleIconColor(index, "في المنزل"),
                         ),
                         FaIcon(FontAwesomeIcons.bus,
-                            color: _handleIconColor(index, "ROAD")),
+                            color: _handleIconColor(index, "في الطريق")),
                         FaIcon(FontAwesomeIcons.child,
-                            color: _handleIconColor(index, "DAYCARE")),
+                            color: _handleIconColor(index, "في الروضة")),
                         FaIcon(FontAwesomeIcons.school,
-                            color: _handleIconColor(index, "SCHOOL")),
+                            color: _handleIconColor(index, "في المؤسسة")),
                       ],
                     ),
                   ),
@@ -175,22 +250,22 @@ class _KidsListState extends State<KidsList> {
             )),
           ),
           Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: CircleAvatar(
                   radius: 30,
                   backgroundColor: Constant.Creamy,
-                  backgroundImage: AssetImage("assets/images/Boy.png"))),
+                  backgroundImage: const AssetImage("assets/images/Boy.png"))),
         ],
       ),
     );
   }
 
   Color _handleIconColor(int index, String icon) {
-    // if (kids[index].position == icon) {
-    //   return Constant.Yellow;
-    // } else {
-    //   return Constant.White;
-    // }
-    return Constant.White;
+    print(kids![index].position);
+    if (kids![index].position == icon) {
+      return Constant.Yellow;
+    } else {
+      return Constant.White;
+    }
   }
 }

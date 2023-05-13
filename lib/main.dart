@@ -1,10 +1,9 @@
 import 'package:rayto/Screens/SplashScreen.dart';
 import 'package:flutter/material.dart';
-import 'package:rayto/Screens/SplashScreen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
@@ -14,7 +13,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'AnimeFreak',
       theme: ThemeData.dark().copyWith(),
-      home: Scaffold(
+      home: const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
@@ -28,7 +27,7 @@ class App extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Allo',
         theme: ThemeData(fontFamily: 'Inter'),
-        home: Scaffold(
+        home: const Scaffold(
           body: SplashScreen(),
         ));
   }

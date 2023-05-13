@@ -1,7 +1,8 @@
 import 'package:rayto/Models/User.dart';
-import 'package:rayto/Screens/AddEmployeeAccount.dart';
 import 'package:rayto/Screens/AddKid.dart';
 import 'package:rayto/Screens/AddParentAccount.dart';
+import 'package:rayto/Screens/ParentPage.dart';
+import 'package:rayto/Screens/SubsPage.dart';
 import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _ParentsListState extends State<ParentsList> {
   }
 
   Future<void> loadData() async {
-    final loadedUsers = await API.getParents(updateParentsState);
+    await API.getParents(updateParentsState);
   }
 
   void updateParentsState(List<User> loadedUsers) {
@@ -69,9 +70,10 @@ class _ParentsListState extends State<ParentsList> {
                   ),
                 );
               },
-              child: FaIcon(FontAwesomeIcons.plus),
+              child: const FaIcon(FontAwesomeIcons.plus),
             )
           : null,
+      backgroundColor: Constant.White,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -79,7 +81,7 @@ class _ParentsListState extends State<ParentsList> {
           children: [
             Container(
               height: 70,
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 18,
               ),
               width: double.infinity,
@@ -89,9 +91,14 @@ class _ParentsListState extends State<ParentsList> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) => SubsPage(user: widget.user)),
+                        ),
+                      );
                     },
-                    child: FaIcon(FontAwesomeIcons.arrowLeft),
+                    child: const FaIcon(FontAwesomeIcons.arrowLeft),
                   ),
                   Visibility(
                     visible: !search,
@@ -100,8 +107,8 @@ class _ParentsListState extends State<ParentsList> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(),
-                          Text(
+                          const SizedBox(),
+                          const Text(
                             "الاولياء",
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
@@ -112,7 +119,8 @@ class _ParentsListState extends State<ParentsList> {
                                   search = !search;
                                 });
                               },
-                              child: FaIcon(FontAwesomeIcons.magnifyingGlass)),
+                              child: const FaIcon(
+                                  FontAwesomeIcons.magnifyingGlass)),
                         ],
                       ),
                     ),
@@ -133,6 +141,9 @@ class _ParentsListState extends State<ParentsList> {
                             textDirection: TextDirection.rtl,
                             child: TextFormField(
                               textAlignVertical: TextAlignVertical.center,
+                              onChanged: (value) {
+                                _filter(value);
+                              },
                               controller: queryController,
                               style: TextStyle(color: Constant.Creamy),
                               decoration: InputDecoration(
@@ -152,14 +163,15 @@ class _ParentsListState extends State<ParentsList> {
             Expanded(
                 child: Container(
                     width: MediaQuery.of(context).size.width,
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: FutureBuilder(
                         future: API.getParents((p0) => null),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (snapshot.hasData && snapshot.data != null) {
                             return ListView.separated(
-                              separatorBuilder: (context, index) => Divider(
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
                                 color: Colors.transparent,
                               ),
                               itemBuilder: (context, index) {
@@ -169,9 +181,10 @@ class _ParentsListState extends State<ParentsList> {
                             );
                           } else if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
+                            return const Center(
+                                child: CircularProgressIndicator());
                           } else {
-                            return Center(
+                            return const Center(
                               child: Text(
                                 "لا يوجد اولياء",
                                 style: TextStyle(
@@ -190,7 +203,15 @@ class _ParentsListState extends State<ParentsList> {
     return GestureDetector(
       onTap: () {
         if (widget.user.auth == "ADMIN" && widget.adding == false) {
-          // Takes you to page where he can renew the sub
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => ParentPage(
+                    user: widget.user,
+                    parent: users![index],
+                  )),
+            ),
+          );
         } else if (widget.user.auth == "ADMIN" && widget.adding == true) {
           Navigator.push(
             context,
@@ -206,7 +227,7 @@ class _ParentsListState extends State<ParentsList> {
       child: Container(
         height: 100,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
           color: Constant.Green,
         ),
         child: Row(
@@ -214,7 +235,7 @@ class _ParentsListState extends State<ParentsList> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Constant.Yellow,
@@ -239,17 +260,17 @@ class _ParentsListState extends State<ParentsList> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
+                      const Text(
                         "طفل",
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color.fromRGBO(247, 239, 234, 0.5)),
                       ),
-                      SizedBox(width: 5),
+                      const SizedBox(width: 5),
                       Text(
                         "${users![index].kids!.length}",
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color.fromRGBO(247, 239, 234, 0.5)),
@@ -259,13 +280,19 @@ class _ParentsListState extends State<ParentsList> {
                 ],
               )),
             ),
-            Container(
-                padding: EdgeInsets.all(8),
-                child: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Constant.Creamy,
-                    backgroundImage:
-                        AssetImage("assets/images/MaleParent.png"))),
+            users![index].picture.contains("assets/images")
+                ? Container(
+                    padding: const EdgeInsets.all(8),
+                    child: CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Constant.Creamy,
+                        backgroundImage: AssetImage(users![index].picture)))
+                : Container(
+                    padding: const EdgeInsets.all(8),
+                    child: CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Constant.Creamy,
+                        backgroundImage: NetworkImage(users![index].picture))),
           ],
         ),
       ),

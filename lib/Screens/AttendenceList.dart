@@ -1,18 +1,43 @@
+import 'package:rayto/Models/Kid.dart';
+import 'package:rayto/Models/User.dart';
+import 'package:rayto/Screens/EmployeeHomePage.dart';
+import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AttendenceList extends StatefulWidget {
-  const AttendenceList({super.key});
+  const AttendenceList({super.key, required this.user});
+  final User user;
 
   @override
   State<AttendenceList> createState() => _AttendenceListState();
 }
 
 class _AttendenceListState extends State<AttendenceList> {
+  List<Kid>? kids;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData(updateKidsState);
+  }
+
+  Future<void> loadData(Function(List<Kid>) updateState) async {
+    final loadedKids = await API.getAttendence(updateState);
+    if (loadedKids == []) {}
+  }
+
+  void updateKidsState(List<Kid> loadedKids) {
+    setState(() {
+      kids = loadedKids;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Constant.White,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -20,7 +45,7 @@ class _AttendenceListState extends State<AttendenceList> {
           children: [
             Container(
               height: 70,
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 18,
               ),
               width: double.infinity,
@@ -30,11 +55,17 @@ class _AttendenceListState extends State<AttendenceList> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) =>
+                              EmployeeHomePage(user: widget.user)),
+                        ),
+                      );
                     },
-                    child: FaIcon(FontAwesomeIcons.arrowLeft),
+                    child: const FaIcon(FontAwesomeIcons.arrowLeft),
                   ),
-                  Text(
+                  const Text(
                     "الغيابات",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -44,29 +75,46 @@ class _AttendenceListState extends State<AttendenceList> {
             ),
             Expanded(
                 child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(16),
-              child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(
-                  color: Colors.transparent,
-                ),
-                itemBuilder: (context, index) {
-                  return _listTile();
-                },
-                itemCount: 4,
-              ),
-            ))
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.all(16),
+                    child: FutureBuilder(
+                        future: loadData((p0) => null),
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasData && snapshot.data != null) {
+                            return ListView.separated(
+                              separatorBuilder: (context, index) => const Divider(
+                                color: Colors.transparent,
+                              ),
+                              itemBuilder: (context, index) {
+                                return _listTile(index);
+                              },
+                              itemCount: kids!.length,
+                            );
+                          } else if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else {
+                            return const Center(
+                              child: Text(
+                                "لا يوجد اطفال",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            );
+                          }
+                        })))
           ],
         ),
       ),
     );
   }
 
-  _listTile() {
+  _listTile(int index) {
     return Container(
       height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         color: Constant.Green,
       ),
       child: Row(
@@ -74,7 +122,7 @@ class _AttendenceListState extends State<AttendenceList> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: CircleAvatar(
                 radius: 20,
                 backgroundColor: Constant.Yellow,
@@ -90,7 +138,7 @@ class _AttendenceListState extends State<AttendenceList> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "اسم الطفل",
+                  "${kids![index].name} ${kids![index].lastname}",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -99,12 +147,20 @@ class _AttendenceListState extends State<AttendenceList> {
               ],
             )),
           ),
-          Container(
-              padding: EdgeInsets.all(8),
-              child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Constant.Creamy,
-                  backgroundImage: AssetImage("assets/images/Girl.png"))),
+          kids![index].picture.contains("assets/images")
+              ? Container(
+                  padding: const EdgeInsets.all(8),
+                  child: CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Constant.Creamy,
+                      backgroundImage: AssetImage(kids![index].picture)))
+              : Container(
+                  padding: const EdgeInsets.all(8),
+                  child: CircleAvatar(
+                      radius: 35,
+                      backgroundColor: Constant.Creamy,
+                      backgroundImage:
+                          NetworkImage(kids![index].picture))),
         ],
       ),
     );

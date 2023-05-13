@@ -1,11 +1,6 @@
-import 'dart:convert';
-import 'package:rayto/Models/User.dart';
 import 'package:rayto/Services/Api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rayto/constant.dart';
-import 'dart:ui';
 
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -17,11 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _showPopup = false;
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool loading = false;
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           Positioned.fill(
             child: Center(
-                child: Container(
+                child: SizedBox(
               width: 350,
               height: 250,
               child: Column(
@@ -62,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           decoration: BoxDecoration(
                               color: Constant.Yellow,
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(16))),
+                                  const BorderRadius.all(Radius.circular(16))),
                           height: 50,
                           width: 250,
                           child: Center(

@@ -32,13 +32,14 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 children: [
                   Text(
                     "مرحبا، ${widget.user.name}",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w600),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   CircleAvatar(
                     radius: 35,
                     backgroundColor: Constant.Background,
-                    child: widget.user.picture != ""
+                    child: !widget.user.picture.contains("assets/images/")
                         ? Image.network(widget.user.picture)
                         : widget.user.gender == "FEMALE"
                             ? Image.asset("assets/images/FemaleEmployee.png")
@@ -64,21 +65,21 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                           SubsPage(
                             user: widget.user,
                           )),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _card("الموظفين", "assets/images/Employees.jpg", context,
                           EmployeesList(user: widget.user))
                     ],
                   ),
-                  SizedBox(height: 50),
+                  const SizedBox(height: 50),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       _card("الغيابات", "assets/images/Attendence.jpg", context,
-                          AttendenceList()),
-                      SizedBox(height: 20),
+                          AttendenceList(user: widget.user)),
+                      const SizedBox(height: 20),
                       _card("الإشعارات", "assets/images/Notification.jpg",
-                          context, NotificationsList())
+                          context, NotificationsList(user: widget.user))
                     ],
                   ),
                 ],
@@ -118,7 +119,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                               FontAwesomeIcons.rightFromBracket,
                               color: Constant.Red,
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Text(
                               "تسجيل الخروج",
                               style: TextStyle(
@@ -151,16 +152,16 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 color: Colors.grey.withOpacity(0.5),
                 spreadRadius: 3,
                 blurRadius: 5,
-                offset: Offset(0, 3),
+                offset: const Offset(0, 3),
               ),
             ],
-            borderRadius: BorderRadius.all(Radius.circular(16))),
+            borderRadius: const BorderRadius.all(Radius.circular(16))),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Image.asset(picture),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               label,
               style: TextStyle(color: Constant.Red, fontSize: 20),

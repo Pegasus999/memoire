@@ -1,4 +1,5 @@
 import 'package:rayto/Models/User.dart';
+import 'package:rayto/Screens/EmployeeHomePage.dart';
 import 'package:rayto/Screens/KidsList.dart';
 import 'package:rayto/Screens/ParentsList.dart';
 import 'package:rayto/constant.dart';
@@ -24,7 +25,7 @@ class _SubsPageState extends State<SubsPage> {
           children: [
             Container(
               height: 70,
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               width: double.infinity,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -32,13 +33,19 @@ class _SubsPageState extends State<SubsPage> {
                 children: [
                   GestureDetector(
                       onTap: () {
-                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) =>
+                                EmployeeHomePage(user: widget.user)),
+                          ),
+                        );
                       },
-                      child: FaIcon(FontAwesomeIcons.arrowLeft)),
+                      child: const FaIcon(FontAwesomeIcons.arrowLeft)),
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.32,
                   ),
-                  Text(
+                  const Text(
                     "المشتركين",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -71,16 +78,16 @@ class _SubsPageState extends State<SubsPage> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 3,
                               blurRadius: 5,
-                              offset: Offset(0, 3),
+                              offset: const Offset(0, 3),
                             ),
                           ],
-                          borderRadius: BorderRadius.all(Radius.circular(16))),
+                          borderRadius: const BorderRadius.all(Radius.circular(16))),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Image.asset("assets/images/Parents.jpg"),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Text(
                             "الأولياء",
                             style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -108,16 +115,16 @@ class _SubsPageState extends State<SubsPage> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 3,
                               blurRadius: 5,
-                              offset: Offset(0, 3),
+                              offset: const Offset(0, 3),
                             ),
                           ],
-                          borderRadius: BorderRadius.all(Radius.circular(16))),
+                          borderRadius: const BorderRadius.all(Radius.circular(16))),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Image.asset("assets/images/Kids.jpg"),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Text(
                             "الأطفال",
                             style: TextStyle(color: Constant.Red, fontSize: 20),

@@ -1,5 +1,6 @@
 import 'package:rayto/Models/User.dart';
 import 'package:rayto/Screens/AddEmployeeAccount.dart';
+import 'package:rayto/Screens/EmployeeHomePage.dart';
 import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _EmployeesListState extends State<EmployeesList> {
   }
 
   Future<void> loadData() async {
-    final loadedUsers = await API.getUsers(updateUsersState);
+    await API.getUsers(updateUsersState);
   }
 
   void updateUsersState(List<User> loadedUsers) {
@@ -65,9 +66,10 @@ class _EmployeesListState extends State<EmployeesList> {
                   ),
                 );
               },
-              child: FaIcon(FontAwesomeIcons.plus),
+              child: const FaIcon(FontAwesomeIcons.plus),
             )
           : null,
+      backgroundColor: Constant.White,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -75,7 +77,7 @@ class _EmployeesListState extends State<EmployeesList> {
           children: [
             Container(
               height: 70,
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 18,
               ),
               width: double.infinity,
@@ -85,9 +87,15 @@ class _EmployeesListState extends State<EmployeesList> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) =>
+                              EmployeeHomePage(user: widget.user)),
+                        ),
+                      );
                     },
-                    child: FaIcon(FontAwesomeIcons.arrowLeft),
+                    child: const FaIcon(FontAwesomeIcons.arrowLeft),
                   ),
                   Visibility(
                     visible: !search,
@@ -96,8 +104,8 @@ class _EmployeesListState extends State<EmployeesList> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          SizedBox(),
-                          Text(
+                          const SizedBox(),
+                          const Text(
                             "الموظفين",
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.bold),
@@ -108,7 +116,8 @@ class _EmployeesListState extends State<EmployeesList> {
                                   search = !search;
                                 });
                               },
-                              child: FaIcon(FontAwesomeIcons.magnifyingGlass)),
+                              child: const FaIcon(
+                                  FontAwesomeIcons.magnifyingGlass)),
                         ],
                       ),
                     ),
@@ -129,6 +138,9 @@ class _EmployeesListState extends State<EmployeesList> {
                             textDirection: TextDirection.rtl,
                             child: TextFormField(
                               textAlignVertical: TextAlignVertical.center,
+                              onChanged: (value) {
+                                _filter(value);
+                              },
                               controller: queryController,
                               style: TextStyle(color: Constant.Creamy),
                               decoration: InputDecoration(
@@ -148,25 +160,24 @@ class _EmployeesListState extends State<EmployeesList> {
             Expanded(
                 child: Container(
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: FutureBuilder(
                   future: API.getUsers((p0) => null),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasData && snapshot.data != null) {
                       return ListView.separated(
-                        separatorBuilder: (context, index) => Divider(
+                        separatorBuilder: (context, index) => const Divider(
                           color: Colors.transparent,
                         ),
                         itemBuilder: (context, index) {
                           return _listTile(index);
                         },
-                        itemCount: users!.length,
+                        itemCount: users != null ? users!.length : 0,
                       );
-                    } else if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
                     } else {
-                      return Center(
+                      return const Center(
                         child: Text(
                           "لا يوجد عمال",
                           style: TextStyle(
@@ -186,7 +197,7 @@ class _EmployeesListState extends State<EmployeesList> {
     return Container(
       height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         color: Constant.Green,
       ),
       child: Row(
@@ -194,7 +205,7 @@ class _EmployeesListState extends State<EmployeesList> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: CircleAvatar(
                 radius: 20,
                 backgroundColor: Constant.Yellow,
@@ -218,7 +229,7 @@ class _EmployeesListState extends State<EmployeesList> {
                 ),
                 Text(
                   "${users![index].job}",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Color.fromRGBO(247, 239, 234, 0.5),
@@ -227,12 +238,23 @@ class _EmployeesListState extends State<EmployeesList> {
               ],
             )),
           ),
-          Container(
-              padding: EdgeInsets.all(8),
-              child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Constant.Creamy,
-                  backgroundImage: AssetImage("${users![index].picture}"))),
+          users![index].picture.contains("assets/images")
+              ? Container(
+                  padding: const EdgeInsets.all(8),
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Constant.Creamy,
+                    backgroundImage: AssetImage(users![index].picture),
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(8),
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Constant.Creamy,
+                    backgroundImage: NetworkImage(users![index].picture),
+                  ),
+                ),
         ],
       ),
     );

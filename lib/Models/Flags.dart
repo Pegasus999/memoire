@@ -1,4 +1,3 @@
-import 'package:rayto/Models/Kid.dart';
 
 class Flag {
   String title = '';

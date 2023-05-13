@@ -1,3 +1,6 @@
+import 'package:rayto/Models/Notification.dart';
+import 'package:rayto/Models/User.dart';
+import 'package:rayto/Screens/EmployeeHomePage.dart';
 import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +8,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class NotificationsList extends StatefulWidget {
-  const NotificationsList({super.key});
+  const NotificationsList({super.key, required this.user});
+  final User user;
 
   @override
   State<NotificationsList> createState() => _NotificationsListState();
@@ -14,6 +18,25 @@ class NotificationsList extends StatefulWidget {
 class _NotificationsListState extends State<NotificationsList> {
   TextEditingController titleController = TextEditingController();
   TextEditingController detailsController = TextEditingController();
+
+  List<Notifications>? notification = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    await API.getNotifications(updateNotificationsState);
+  }
+
+  void updateNotificationsState(List<Notifications> loadedNotifications) {
+    setState(() {
+      notification = loadedNotifications;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,8 +46,9 @@ class _NotificationsListState extends State<NotificationsList> {
         onPressed: () {
           _showDialog();
         },
-        child: FaIcon(FontAwesomeIcons.plus),
+        child: const FaIcon(FontAwesomeIcons.plus),
       ),
+      backgroundColor: Constant.White,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -32,7 +56,7 @@ class _NotificationsListState extends State<NotificationsList> {
           children: [
             Container(
               height: 70,
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 horizontal: 18,
               ),
               width: double.infinity,
@@ -42,11 +66,16 @@ class _NotificationsListState extends State<NotificationsList> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pop();
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) =>
+                                EmployeeHomePage(user: widget.user)),
+                          ));
                     },
-                    child: FaIcon(FontAwesomeIcons.arrowLeft),
+                    child: const FaIcon(FontAwesomeIcons.arrowLeft),
                   ),
-                  Text(
+                  const Text(
                     "الاشعارات",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -56,30 +85,49 @@ class _NotificationsListState extends State<NotificationsList> {
             ),
             Expanded(
                 child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.all(16),
-              child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(
-                  color: Colors.transparent,
-                ),
-                itemBuilder: (context, index) {
-                  return _listTile();
-                },
-                itemCount: 4,
-              ),
-            ))
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.all(16),
+                    child: FutureBuilder(
+                        future: API.getNotifications((p0) => null),
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.hasData && snapshot.data != null) {
+                            return ListView.separated(
+                              separatorBuilder: (context, index) =>
+                                  const Divider(
+                                color: Colors.transparent,
+                              ),
+                              itemBuilder: (context, index) {
+                                return _listTile(index);
+                              },
+                              itemCount: notification!.length,
+                            );
+                          } else if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            return const Center(
+                              child: Text(
+                                "لا يوجد اشعارات",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            );
+                          }
+                        })))
           ],
         ),
       ),
     );
   }
 
-  _listTile() {
+  _listTile(int index) {
     return Container(
       height: 100,
-      padding: EdgeInsets.all(4),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
         color: Constant.Green,
       ),
       child: Row(
@@ -96,7 +144,8 @@ class _NotificationsListState extends State<NotificationsList> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text("22/03/2023", style: TextStyle(color: Constant.White))
+                    Text(notification![index].date,
+                        style: TextStyle(color: Constant.White))
                   ],
                 ),
               ),
@@ -105,13 +154,13 @@ class _NotificationsListState extends State<NotificationsList> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("عنوان الاشعار",
+                  Text(notification![index].title,
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Constant.White)),
-                  Text("تفاصيل الاشعار",
-                      style: TextStyle(
+                  Text(notification![index].content,
+                      style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Color.fromRGBO(247, 239, 234, 0.5)))
@@ -119,7 +168,7 @@ class _NotificationsListState extends State<NotificationsList> {
               ))
             ],
           )),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Image.asset(
             "assets/images/Notification.png",
             height: 80,
@@ -137,19 +186,19 @@ class _NotificationsListState extends State<NotificationsList> {
               backgroundColor: Constant.White,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
-              content: Container(
+              content: SizedBox(
                 height: MediaQuery.of(context).size.height * 0.4,
                 width: MediaQuery.of(context).size.width,
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         "اضافة",
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                       Expanded(
                         child: Column(
                           children: [
@@ -181,7 +230,7 @@ class _NotificationsListState extends State<NotificationsList> {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
@@ -216,14 +265,17 @@ class _NotificationsListState extends State<NotificationsList> {
                         ),
                       ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           GestureDetector(
                             onTap: () async {
                               if (titleController.text.isNotEmpty &&
-                                  detailsController.text.isNotEmpty)
+                                  detailsController.text.isNotEmpty) {
                                 _showToast(await API.addNotification(
                                     titleController.text,
                                     detailsController.text));
+                              }
                               Navigator.of(context).pop();
                               titleController.text = "";
                               detailsController.text = '';
@@ -231,8 +283,8 @@ class _NotificationsListState extends State<NotificationsList> {
                             child: Container(
                               decoration: BoxDecoration(
                                   color: Constant.Yellow,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(16))),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(16))),
                               width: 60,
                               height: 40,
                               child: Center(
@@ -245,8 +297,6 @@ class _NotificationsListState extends State<NotificationsList> {
                             ),
                           )
                         ],
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                       )
                     ]),
               ));
@@ -255,11 +305,10 @@ class _NotificationsListState extends State<NotificationsList> {
 
   _showToast(String message) {
     Fluttertoast.showToast(
-        msg: "${message}",
+        msg: message,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: 16.0);
   }

@@ -12,19 +12,18 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class API {
-  static String baseUrl = "http://192.168.43.25:5000/";
+  static String baseUrl = "http://192.168.43.25:5000/api/";
   static Future<void> login(
       String username, String password, BuildContext context) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('${baseUrl}api/auth/signin');
+      final url = Uri.parse('${baseUrl}auth/signin');
       final body = jsonEncode(
           {'username': username.trim(), 'password': password.trim()});
 
       final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
         var user = User.fromJson(jsonDecode(response.body));
-        ;
         user.auth == "ADMIN" || user.auth == "WORKER"
             ? Navigator.pushReplacement(
                 context,
@@ -45,7 +44,7 @@ class API {
                   )
                 : throw Exception("معلومات خاطئة");
       } else {
-        print('Request failed with status: ${response.statusCode}.');
+        throw Exception("معلومات خاطئة");
       }
     } catch (error) {
       //   // Handle any exceptions that occurred during the request
@@ -53,11 +52,11 @@ class API {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text("Error"),
+              title: const Text("Error"),
               content: Text(error.toString()),
               actions: [
                 TextButton(
-                  child: Text("OK"),
+                  child: const Text("OK"),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -69,7 +68,7 @@ class API {
   }
 
   static Future<List<User>?> getUsers(Function(List<User>) updateState) async {
-    var url = Uri.parse("${baseUrl}api/user/getEmployees");
+    var url = Uri.parse("${baseUrl}user/getEmployees");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
     if (data.runtimeType == String) {
@@ -82,7 +81,7 @@ class API {
 
   static Future<List<User>?> getParents(
       Function(List<User>) updateState) async {
-    var url = Uri.parse("${baseUrl}api/user/getParents");
+    var url = Uri.parse("${baseUrl}user/getParents");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
     if (data.runtimeType == String) {
@@ -95,7 +94,7 @@ class API {
 
   static Future<List<Notifications>?> getNotifications(
       Function(List<Notifications>) updateState) async {
-    var url = Uri.parse("${baseUrl}api/notif/getAll");
+    var url = Uri.parse("${baseUrl}notif/getAll");
     var response = await http.get(url);
     var data = jsonDecode(response.body);
 
@@ -109,7 +108,7 @@ class API {
 
   static Future<List<Kid>?> getKids(Function(List<Kid>) updateState) async {
     try {
-      var url = Uri.parse("${baseUrl}api/kids/getAll");
+      var url = Uri.parse("${baseUrl}kids/getAll");
       var response = await http.get(url);
       var data = jsonDecode(response.body);
       if (data.runtimeType == String) {
@@ -119,13 +118,13 @@ class API {
       updateState(loadedKids);
       return Kid.parseKids(data);
     } catch (err) {
-      print(err);
+      throw Exception("$err");
     }
   }
 
   static Future<List<Zone>?> getZones(Function(List<Zone>) updateState) async {
     try {
-      var url = Uri.parse('${baseUrl}api/user/getZones');
+      var url = Uri.parse('${baseUrl}user/getZones');
       var response = await http.get(url);
       var data = jsonDecode(response.body);
       if (data.runtimeType == String) {
@@ -144,7 +143,7 @@ class API {
       User user, String username, String password, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
-      final url = Uri.parse('${baseUrl}api/user/addWorker');
+      final url = Uri.parse('${baseUrl}user/addWorker');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
@@ -178,7 +177,7 @@ class API {
       String password, String? zone, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
-      final url = Uri.parse('${baseUrl}api/user/addDriver');
+      final url = Uri.parse('${baseUrl}user/addDriver');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
@@ -210,7 +209,7 @@ class API {
       User user, String username, String password, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
-      final url = Uri.parse('${baseUrl}api/user/addParent');
+      final url = Uri.parse('${baseUrl}user/addParent');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
@@ -242,15 +241,15 @@ class API {
   static Future<String> addKid(Kid kid, XFile? file) async {
     try {
       final headers = {'Content-Type': 'multipart/form-data'};
-      final url = Uri.parse('${baseUrl}api/kids/addKid');
+      final url = Uri.parse('${baseUrl}kids/addKid');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll(headers);
       request.fields.addAll({
         "user": kid.parentId,
         "name": kid.name,
         "lastname": kid.lastname,
-        "date": kid.birthday.toString(),
         "school": kid.school,
+        "gender": kid.gender,
         "zone": kid.zone.name,
       });
       if (file != null) {
@@ -270,7 +269,7 @@ class API {
   static Future<String> addNotification(String title, String details) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('${baseUrl}api/notif/post');
+      final url = Uri.parse('${baseUrl}notif/post');
       final body = jsonEncode({
         "title": title,
         "content": details,
@@ -294,7 +293,7 @@ class API {
       Function(List<Kid>) updateState, String zone) async {
     try {
       final headers = {'Content-Type': 'application/json'};
-      var url = Uri.parse('${baseUrl}api/kids/getZoneRelated');
+      var url = Uri.parse('${baseUrl}kids/getZoneRelated');
       var body = jsonEncode({"zone": zone});
       final response = await http.post(url, headers: headers, body: body);
 
@@ -311,19 +310,6 @@ class API {
     }
   }
 
-  static Future<String> updateAllPosition(
-      String newPosition, String zone) async {
-    try {
-      final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('${baseUrl}api/kids/updateAll');
-      final body = jsonEncode({"position": newPosition, "zone": zone});
-      final response = await http.put(url, body: body, headers: headers);
-      return "Position Updated";
-    } catch (err) {
-      return "Request failed";
-    }
-  }
-
   static Future<String> updateSinglePosition(String position, String id) async {
     try {
       final newPosition = position == 'في المنزل'
@@ -332,14 +318,44 @@ class API {
               ? "ROAD"
               : "DAYCARE";
       final headers = {'Content-Type': 'application/json'};
-      final url = Uri.parse('${baseUrl}api/kids/updateSingle');
+      final url = Uri.parse('${baseUrl}attendence/updatePosition');
 
-      final body = jsonEncode({"position": newPosition, "id": id});
-      final response = await http.put(url, body: body, headers: headers);
+      final body = jsonEncode({"position": newPosition, "kid_id": id});
+      await http.put(url, body: body, headers: headers);
 
       return "Position Updated";
     } catch (err) {
       return "Request failed";
+    }
+  }
+
+  static Future<List<Kid>?> getAttendence(
+      Function(List<Kid>) updateState) async {
+    try {
+      var url = Uri.parse("${baseUrl}attendence/getAll");
+      var response = await http.get(url);
+      var data = jsonDecode(response.body);
+      if (data.runtimeType == String) {
+        return null;
+      }
+      List<Kid> loadedKids = Kid.parseKids(data);
+      updateState(loadedKids);
+      return Kid.parseKids(data);
+    } catch (err) {
+      throw Exception("$err");
+    }
+  }
+
+  static Future<String> resetAttendence(String zone) async {
+    try {
+      final headers = {'Content-Type': 'application/json'};
+      final body = jsonEncode({'zone': zone});
+
+      final url = Uri.parse("${baseUrl}attendence/restAll");
+      await http.put(url, headers: headers, body: body);
+      return "reseted";
+    } catch (err) {
+      throw Exception("$err");
     }
   }
 }

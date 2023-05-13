@@ -73,7 +73,7 @@ class _AddEmployeeState extends State<AddEmployee> {
   }
 
   void loadData() async {
-    final loadedZone = await API.getZones(updateZonesState);
+    await API.getZones(updateZonesState);
   }
 
   @override
@@ -88,7 +88,7 @@ class _AddEmployeeState extends State<AddEmployee> {
       backgroundColor: Constant.White,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
+          child: SizedBox(
             height: (MediaQuery.of(context).size.height -
                 MediaQuery.of(context).padding.top),
             width: MediaQuery.of(context).size.width,
@@ -98,7 +98,7 @@ class _AddEmployeeState extends State<AddEmployee> {
               children: [
                 Container(
                   height: 70,
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                   ),
                   width: double.infinity,
@@ -108,7 +108,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                       children: [
                         Container(
                           height: 70,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                           ),
                           width: double.infinity,
@@ -118,16 +118,17 @@ class _AddEmployeeState extends State<AddEmployee> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  if (page == 0)
+                                  if (page == 0) {
                                     Navigator.of(context).pop();
-                                  else
+                                  } else {
                                     setState(() {
                                       page--;
                                     });
+                                  }
                                 },
-                                child: FaIcon(FontAwesomeIcons.arrowLeft),
+                                child: const FaIcon(FontAwesomeIcons.arrowLeft),
                               ),
-                              Text(
+                              const Text(
                                 "اضافة",
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
@@ -137,8 +138,8 @@ class _AddEmployeeState extends State<AddEmployee> {
                                       onTap: () {
                                         Navigator.of(context).pop();
                                       },
-                                      child:
-                                          FaIcon(FontAwesomeIcons.houseChimney),
+                                      child: const FaIcon(
+                                          FontAwesomeIcons.houseChimney),
                                     )
                                   : const SizedBox(width: 20)
                             ],
@@ -183,18 +184,18 @@ class _AddEmployeeState extends State<AddEmployee> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 3,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
+                    SizedBox(
                         width: 115,
                         child: Image.asset("assets/images/MaleEmployee.png")),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       "ذكر",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -220,18 +221,18 @@ class _AddEmployeeState extends State<AddEmployee> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 3,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
+                    SizedBox(
                         width: 110,
                         child: Image.asset("assets/images/FemaleEmployee.png")),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       "انثى",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -270,18 +271,19 @@ class _AddEmployeeState extends State<AddEmployee> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 3,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                        width: 115,
-                        child: Image.asset("assets/images/MaleEmployee.png")),
-                    SizedBox(height: 10),
+                    SizedBox(
+                        width: 110,
+                        child: Image.asset(
+                            "assets/images/${gender == "MALE" ? "MaleEmployee" : "FemaleEmployee"}.png")),
+                    const SizedBox(height: 10),
                     Text(
                       "موظف",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -307,18 +309,18 @@ class _AddEmployeeState extends State<AddEmployee> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 3,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
+                    SizedBox(
                         width: 115,
                         child: Image.asset("assets/images/Driver.png")),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       "سائق",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -351,7 +353,8 @@ class _AddEmployeeState extends State<AddEmployee> {
                         radius: 50,
                         backgroundColor: Constant.Creamy,
                         backgroundImage: auth == "WORKER"
-                            ? const AssetImage("assets/images/MaleEmployee.png")
+                            ? AssetImage(
+                                "assets/images/${gender == "MALE" ? "MaleEmployee" : "FemaleEmployee"}.png")
                             : const AssetImage("assets/images/Driver.png"),
                       )
                     : CircleAvatar(
@@ -359,30 +362,30 @@ class _AddEmployeeState extends State<AddEmployee> {
                         backgroundColor: Constant.Creamy,
                         backgroundImage: FileImage(File(picture!.path)),
                       )),
-            SizedBox(height: 20),
-            Center(child: Text("اضافة صورة")),
-            SizedBox(height: 50),
+            const SizedBox(height: 20),
+            const Center(child: Text("اضافة صورة")),
+            const SizedBox(height: 50),
             _input("الاسم", nameController, false),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _input("اللقب", lastNameController, false),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _input("اسم المستخدم", usernameController, false),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _input("كلمة السر", passwordController, true),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _input("رقم الهاتف", phoneController, false),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             auth == "WORKER"
                 ? _input('الوظيفة', jobController, false)
                 : _dropDownMenu(),
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             Opacity(
               opacity: _ready ? 1 : 0.7,
               child: GestureDetector(
                   onTap: () {
                     if (_ready) {
                       _createUser();
-                    } else if (phoneController.text.length != 10) {
+                    } else if (phoneController.text.trim().length != 10) {
                       Fluttertoast.showToast(msg: "الرجاء تأكد من رقم الهاتف");
                     } else {
                       Fluttertoast.showToast(msg: "الرجاء ادخال معلومات");
@@ -391,7 +394,8 @@ class _AddEmployeeState extends State<AddEmployee> {
                   child: Container(
                     decoration: BoxDecoration(
                         color: Constant.Yellow,
-                        borderRadius: BorderRadius.all(Radius.circular(16))),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(16))),
                     height: 50,
                     width: 250,
                     child: Center(
@@ -430,7 +434,7 @@ class _AddEmployeeState extends State<AddEmployee> {
           padding: const EdgeInsets.all(8.0),
           child: Stack(
             children: [
-              Align(
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Icon(Icons.arrow_drop_down),
               ),
@@ -461,9 +465,9 @@ class _AddEmployeeState extends State<AddEmployee> {
   _onDropDownClick() {
     DropDownState(
       DropDown(
-        bottomSheetTitle: Align(
+        bottomSheetTitle: const Align(
           alignment: Alignment.centerRight,
-          child: const Text(
+          child: Text(
             "المناطق",
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -502,8 +506,8 @@ class _AddEmployeeState extends State<AddEmployee> {
           return AlertDialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            title: Text('Please choose media to select'),
-            content: Container(
+            title: const Text('Please choose media to select'),
+            content: SizedBox(
               height: MediaQuery.of(context).size.height / 6,
               child: Column(
                 children: [
@@ -513,7 +517,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                       Navigator.pop(context);
                       getAccImage(ImageSource.gallery);
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(Icons.image),
                         Text('From Gallery'),
@@ -526,7 +530,7 @@ class _AddEmployeeState extends State<AddEmployee> {
                       Navigator.pop(context);
                       getAccImage(ImageSource.camera);
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(Icons.camera),
                         Text('From Camera'),
@@ -542,23 +546,26 @@ class _AddEmployeeState extends State<AddEmployee> {
 
   _checkFields() {
     if (auth == "WORKER") {
+      final phone = phoneController.text.trim();
+      final bool check = usernameController.text.isNotEmpty &&
+          passwordController.text.isNotEmpty &&
+          nameController.text.isNotEmpty &&
+          lastNameController.text.isNotEmpty &&
+          phoneController.text.isNotEmpty &&
+          phone.length == 10 &&
+          jobController.text.isNotEmpty;
       setState(() {
-        _ready = usernameController.text.isNotEmpty &&
-            passwordController.text.isNotEmpty &&
-            nameController.text.isNotEmpty &&
-            lastNameController.text.isNotEmpty &&
-            phoneController.text.isNotEmpty &&
-            phoneController.text.length == 10 &&
-            jobController.text.isNotEmpty;
+        _ready = check;
       });
     } else {
+      final phone = phoneController.text.trim();
       setState(() {
         _ready = usernameController.text.isNotEmpty &&
             passwordController.text.isNotEmpty &&
             nameController.text.isNotEmpty &&
             lastNameController.text.isNotEmpty &&
             phoneController.text.isNotEmpty &&
-            phoneController.text.length == 10 &&
+            phone.length == 10 &&
             zone != null;
       });
     }

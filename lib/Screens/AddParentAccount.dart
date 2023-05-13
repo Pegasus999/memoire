@@ -10,7 +10,6 @@ import 'package:drop_down_list/drop_down_list.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:rayto/Screens/AddKid.dart';
-import 'package:rayto/Screens/ParentsList.dart';
 import 'package:rayto/Services/Api.dart';
 import 'package:rayto/constant.dart';
 
@@ -80,7 +79,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
   }
 
   void loadData() async {
-    final loadedZone = await API.getZones(updateZonesState);
+    await API.getZones(updateZonesState);
   }
 
   @override
@@ -95,7 +94,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
       backgroundColor: Constant.White,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
+          child: SizedBox(
             height: (MediaQuery.of(context).size.height -
                 MediaQuery.of(context).padding.top),
             width: MediaQuery.of(context).size.width,
@@ -105,7 +104,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
               children: [
                 Container(
                   height: 70,
-                  padding: EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                   ),
                   width: double.infinity,
@@ -115,7 +114,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
                       children: [
                         Container(
                           height: 70,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                           ),
                           width: double.infinity,
@@ -125,16 +124,17 @@ class _AddParentAccountState extends State<AddParentAccount> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  if (page == 0)
+                                  if (page == 0) {
                                     Navigator.of(context).pop();
-                                  else
+                                  } else {
                                     setState(() {
                                       page--;
                                     });
+                                  }
                                 },
-                                child: FaIcon(FontAwesomeIcons.arrowLeft),
+                                child: const FaIcon(FontAwesomeIcons.arrowLeft),
                               ),
-                              Text(
+                              const Text(
                                 "اضافة",
                                 style: TextStyle(
                                     fontSize: 20, fontWeight: FontWeight.bold),
@@ -144,8 +144,8 @@ class _AddParentAccountState extends State<AddParentAccount> {
                                       onTap: () {
                                         Navigator.of(context).pop();
                                       },
-                                      child:
-                                          FaIcon(FontAwesomeIcons.houseChimney),
+                                      child: const FaIcon(
+                                          FontAwesomeIcons.houseChimney),
                                     )
                                   : const SizedBox(width: 20)
                             ],
@@ -186,18 +186,18 @@ class _AddParentAccountState extends State<AddParentAccount> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 3,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
+                    SizedBox(
                         width: 115,
                         child: Image.asset("assets/images/MaleParent.png")),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       "ذكر",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -223,18 +223,18 @@ class _AddParentAccountState extends State<AddParentAccount> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 3,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
+                    SizedBox(
                         width: 110,
                         child: Image.asset("assets/images/FemaleParent.png")),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       "انثى",
                       style: TextStyle(color: Constant.Red, fontSize: 20),
@@ -277,27 +277,27 @@ class _AddParentAccountState extends State<AddParentAccount> {
                           backgroundColor: Constant.Creamy,
                           backgroundImage: FileImage(File(picture!.path)),
                         )),
-              SizedBox(height: 20),
-              Center(child: Text("اضافة صورة")),
-              SizedBox(height: 50),
+              const SizedBox(height: 20),
+              const Center(child: Text("اضافة صورة")),
+              const SizedBox(height: 50),
               _input("الاسم", nameController, false),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _input("اللقب", lastNameController, false),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _input("اسم المستخدم", usernameController, false),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _input("كلمة السر", passwordController, true),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _input("رقم الهاتف", phoneController, false),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _input("العنوان", addressController, false),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _dropDownMenu(),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
             ],
           ),
         )),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Opacity(
           opacity: _ready ? 1 : 0.7,
           child: GestureDetector(
@@ -315,7 +315,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
               child: Container(
                 decoration: BoxDecoration(
                     color: Constant.Yellow,
-                    borderRadius: BorderRadius.all(Radius.circular(16))),
+                    borderRadius: const BorderRadius.all(Radius.circular(16))),
                 height: 50,
                 width: 250,
                 child: Center(
@@ -332,7 +332,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
                           )),
               )),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
       ],
     ));
   }
@@ -344,8 +344,8 @@ class _AddParentAccountState extends State<AddParentAccount> {
           return AlertDialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            title: Text('Please choose media to select'),
-            content: Container(
+            title: const Text('Please choose media to select'),
+            content: SizedBox(
               height: MediaQuery.of(context).size.height / 6,
               child: Column(
                 children: [
@@ -355,7 +355,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
                       Navigator.pop(context);
                       getAccImage(ImageSource.gallery);
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(Icons.image),
                         Text('From Gallery'),
@@ -368,7 +368,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
                       Navigator.pop(context);
                       getAccImage(ImageSource.camera);
                     },
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(Icons.camera),
                         Text('From Camera'),
@@ -423,7 +423,7 @@ class _AddParentAccountState extends State<AddParentAccount> {
           padding: const EdgeInsets.all(8.0),
           child: Stack(
             children: [
-              Align(
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Icon(Icons.arrow_drop_down),
               ),
@@ -454,9 +454,9 @@ class _AddParentAccountState extends State<AddParentAccount> {
   _onDropDownClick() {
     DropDownState(
       DropDown(
-        bottomSheetTitle: Align(
+        bottomSheetTitle: const Align(
           alignment: Alignment.centerRight,
-          child: const Text(
+          child: Text(
             "المناطق",
             style: TextStyle(
               fontWeight: FontWeight.bold,
