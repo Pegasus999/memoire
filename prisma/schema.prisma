@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Position {
+  DAYCARE
+  HOME
+  SCHOOL
+  ROAD
+}
+
+enum Auth {
+  PARENT
+  ADMIN
+  WORKER
+  DRIVER
+}
+
+model Kid {
+  id             String   @id @default(uuid())
+  name           String
+  lastname       String
+  picture        String
+  gender         String
+  subscription   DateTime
+  school         String
+  User           User?    @relation("UserKids", fields: [userId], references: [id])
+  userId         String?
+  position       Position @default(HOME)
+  zone           Zone?    @relation(fields: [zoneId], references: [id])
+  zoneId         Int?
+  morningPresent Boolean  @default(false)
+  eveningPresent Boolean  @default(false)
+}
+
+model User {
+  id       String  @id @default(uuid())
+  username String  @unique
+  password String
+  gender   String
+  job      String?
+  name     String
+  lastname String
+  phone    String
+  adress   String?
+  auth     Auth
+  picture  String
+  zone     Zone?   @relation(fields: [zoneId], references: [id])
+  kids     Kid[]   @relation("UserKids")
+  zoneId   Int?
+}
+
+model Zone {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  Kid  Kid[]
+  User User[]
+}
+
+model Notification {
+  id      Int    @id @default(autoincrement())
+  title   String
+  content String
+  date    String
+}
