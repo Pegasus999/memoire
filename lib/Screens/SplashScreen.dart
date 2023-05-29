@@ -27,9 +27,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: SvgPicture.asset(
-      'assets/images/logo.svg',
-      semanticsLabel: 'logo',
+        child: Container(
+      width: 150,
+      height: 150,
+      child: Image.asset(
+        'assets/images/logo.png',
+      ),
     ));
   }
 }
